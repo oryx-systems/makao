@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE
+    IF EXISTS "contact"
+    DROP CONSTRAINT IF EXISTS "user_id";
+
+COMMIT;
