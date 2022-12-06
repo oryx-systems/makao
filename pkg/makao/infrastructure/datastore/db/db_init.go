@@ -1,16 +1,16 @@
-package datastore
+package db
 
 import (
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
-	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore/psql"
+	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore/db/gorm"
 	log "github.com/sirupsen/logrus"
 )
 
 // Repository holds a set of all the repository methods that interact with the database
 type Repository interface {
-	Create
-	Query
-	Update
+	gorm.Create
+	gorm.Query
+	gorm.Update
 }
 
 // DbServiceImpl is an implementation of the database repository
@@ -20,8 +20,8 @@ type DbServiceImpl struct {
 	Repository
 }
 
-// NewDbService creates a new database service
-func NewDbService() *DbServiceImpl {
+// NewDBService creates a new database service
+func NewDBService() *DbServiceImpl {
 	// This implementation is database agnostic. It can be changed to use any database. e.g. Pg, Firebase, MongoDB, etc
 	environment := helpers.MustGetEnvVar("REPOSITORY")
 
@@ -30,7 +30,7 @@ func NewDbService() *DbServiceImpl {
 		return nil
 
 	case "postgres":
-		pg, err := psql.NewPGInstance()
+		pg, err := gorm.NewPGInstance()
 		if err != nil {
 			log.Panicf("can't initialize postgres when setting up profile service: %s", err)
 		}

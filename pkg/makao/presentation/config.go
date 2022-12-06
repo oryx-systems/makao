@@ -2,14 +2,20 @@ package presentation
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
 	"github.com/oryx-systems/makao/pkg/makao/infrastructure"
+	"github.com/oryx-systems/makao/pkg/makao/presentation/graph"
+	"github.com/oryx-systems/makao/pkg/makao/presentation/graph/generated"
 	"github.com/oryx-systems/makao/pkg/makao/presentation/rest"
 	"github.com/oryx-systems/makao/pkg/makao/usecases"
 )
@@ -20,7 +26,6 @@ const serverTimeoutSeconds = 120
 // this service
 var SMSServiceAllowedOrigins = []string{
 	"http://localhost:8080",
-	"https://oryx-staging-6hapifddxq-nw.a.run.app",
 }
 
 // SMSServiceAllowedHeaders is a list of CORS allowed headers for the clinical
@@ -46,13 +51,13 @@ func PrepareServer(
 	allowedOrigins []string,
 ) *http.Server {
 	// start up the router
-	r, err := StartGinRouter(ctx)
+	router, err := StartGinRouter(ctx)
 	if err != nil {
 		helpers.LogStartupError(ctx, err)
 	}
 
 	// Set allowed origins
-	r.Use(cors.New(cors.Config{
+	router.Use(cors.New(cors.Config{
 		AllowOrigins:     SMSServiceAllowedOrigins,
 		AllowHeaders:     SMSServiceAllowedHeaders,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
@@ -62,7 +67,7 @@ func PrepareServer(
 	// Use custom http to serve request via GIN
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
-		Handler:      r,
+		Handler:      router,
 		ReadTimeout:  serverTimeoutSeconds * time.Second,
 		WriteTimeout: serverTimeoutSeconds * time.Second,
 	}
@@ -70,19 +75,60 @@ func PrepareServer(
 	return srv
 }
 
+// HealthStatusCheck endpoint to check if the server is working.
+func HealthStatusCheck(w gin.ResponseWriter, r *http.Request) {
+	err := json.NewEncoder(w).Encode(true)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// Defining the Playground handler
+func PlaygroundHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL IDE", "/v1/auth/graphql")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+// GQLHandler sets up a GraphQL resolver
+func GQLHandler(ctx context.Context,
+	usecase usecases.Makao,
+) gin.HandlerFunc {
+	resolver, err := graph.NewResolver(ctx, usecase)
+	if err != nil {
+		helpers.LogStartupError(ctx, err)
+	}
+
+	server := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
+
+	return func(c *gin.Context) {
+		server.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
 // StartGinRouter sets up the GIN router
 func StartGinRouter(ctx context.Context) (*gin.Engine, error) {
 	r := gin.Default()
-	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
 	infrastructure := infrastructure.NewInfrastructureInteractor()
-	usecases := usecases.NewUseCasesInteractor(infrastructure)
-	h := rest.NewPresentationHandlers(infrastructure, usecases)
+	usecases := usecases.NewMakaoUsecase(*infrastructure)
+	h := rest.NewPresentationHandlers(*infrastructure, *usecases)
 
-	api := r.Group("/api/v1")
+	api := r.Group("/v1/api")
 	{
-		api.POST("/incoming_messages", h.HandleIncomingMessages())
+		api.GET("/login_by_phone", h.HandleLoginByPhone())
+		api.POST("/sign_up", h.HandleRegistration())
+		api.GET("/ide", PlaygroundHandler())
+	}
+
+	// Authenticated routes
+	auth := r.Group("/v1/auth")
+	auth.Use(rest.AuthMiddleware())
+	{
+		auth.POST("/graphql", GQLHandler(ctx, *usecases))
 	}
 
 	return r, nil

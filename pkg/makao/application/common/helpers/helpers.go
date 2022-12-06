@@ -145,3 +145,18 @@ func CloseStackDriverErrorClient(errorClient *errorreporting.Client) {
 		log.WithFields(log.Fields{"error": err}).Error("Unable to close StackDriver error client")
 	}
 }
+
+// GetUserTokenFromContext retrieves a Firebase *auth.Token from the supplied context
+func GetUserTokenFromContext(ctx context.Context) (string, error) {
+	val := ctx.Value(common.AuthTokenContextKey)
+	if val == nil {
+		return "", fmt.Errorf(
+			"unable to get auth token from context with key %#v", common.AuthTokenContextKey)
+	}
+
+	log.Print("THE TOKEN VAL IS: ", val)
+
+	token := val.(string)
+
+	return token, nil
+}

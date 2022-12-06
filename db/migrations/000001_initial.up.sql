@@ -53,7 +53,7 @@ CREATE TABLE "user_otp" (
   "updated_by" uuid,
   "is_valid" boolean,
   "valid_until" timestamp NOT NULL,
-  "phonenumber" varchar(20) NOT NULL,
+  "phone_number" varchar(20) NOT NULL,
   "otp" varchar(10) NOT NULL,
   "flavour" varchar(10) NOT NULL,
   "medium" varchar(10),
@@ -67,7 +67,7 @@ CREATE TABLE "residence" (
   "updated_at" timestamp,
   "updated_by" uuid,
   "active" boolean,
-  "name" varchar(50) NOT NULL,
+  "name" varchar(100) UNIQUE NOT NULL,
   "registration_number" varchar(50) NOT NULL,
   "location" varchar(100),
   "living_rooms_count" int,
@@ -117,6 +117,8 @@ CREATE TABLE "bill" (
   "penalty" float DEFAULT 0,
   "user_id" uuid NOT NULL
 );
+
+CREATE UNIQUE INDEX ON "contact" ("flavour", "contact_value");
 
 CREATE UNIQUE INDEX ON "identifier" ("identifier_type", "identifier_value");
 
