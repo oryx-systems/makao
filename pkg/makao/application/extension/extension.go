@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
@@ -12,15 +13,15 @@ import (
 // Extension holds the methods that are used by the extension
 type Extension interface {
 	MakeRequest(ctx context.Context, method string, path string, body interface{}) (*http.Response, error)
+	GetLoggedInUserUID(ctx context.Context) (string, error)
 }
 
 // ExtImpl implements the Extension interface
 type ExtImpl struct {
-	Extension
 }
 
 // NewExtension initializes the extension methods
-func NewExtension() *ExtImpl {
+func NewExtension() Extension {
 	return &ExtImpl{}
 }
 
@@ -63,4 +64,13 @@ func (e ExtImpl) MakeRequest(ctx context.Context, method string, path string, bo
 	req.Header.Set("Content-Type", "application/json")
 
 	return client.Do(req)
+}
+
+// GetLoggedInUserUID returns the UID of the logged in user
+func (e ExtImpl) GetLoggedInUserUID(ctx context.Context) (string, error) {
+	authToken, err := helpers.GetUserTokenFromContext(ctx)
+	if err != nil {
+		return "", fmt.Errorf("auth token not found in context: %w", err)
+	}
+	return authToken, nil
 }

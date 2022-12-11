@@ -1,7 +1,15 @@
 package datastore
 
+import (
+	"context"
+
+	"github.com/oryx-systems/makao/pkg/makao/domain"
+)
+
 // Create is a collection of methods to carry out create operations on the database
 type Create interface {
+	RegisterUser(ctx context.Context, user *domain.User, contact *domain.Contact, identifier *domain.Identifier) error
+	SaveOTP(ctx context.Context, otp *domain.OTP) error
 }
 
 // Query hold a collection of methods to interact with the querying of any data

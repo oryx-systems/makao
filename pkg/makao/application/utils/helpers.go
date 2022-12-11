@@ -8,15 +8,21 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strconv"
+	"time"
 
 	"github.com/labstack/gommon/log"
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
+	"github.com/pkg/errors"
+	"github.com/pquerna/otp/totp"
 )
 
 const (
 	// DebugEnvVarName is used to determine if we should print extended tracing / logging (debugging aids)
 	// to the console
 	DebugEnvVarName = "DEBUG"
+
+	issuer      = "Oreon Developers"
+	accountName = "oreondevelopers@gmail.com"
 )
 
 // WriteJSONResponse writes the content supplied via the `source` parameter to
@@ -104,4 +110,23 @@ func ErrorMap(err error) map[string]string {
 	errMap := make(map[string]string)
 	errMap["error"] = err.Error()
 	return errMap
+}
+
+// GenerateOTP is used to generate a one time password
+func GenerateOTP() (string, error) {
+	opts := totp.GenerateOpts{
+		Issuer:      issuer,
+		AccountName: accountName,
+	}
+	key, err := totp.Generate(opts)
+	if err != nil {
+		return "", errors.Wrap(err, "generateOTP")
+	}
+
+	code, err := totp.GenerateCode(key.Secret(), time.Now())
+	if err != nil {
+		return "", errors.Wrap(err, "generateOTP > GenerateCode")
+	}
+
+	return code, nil
 }
