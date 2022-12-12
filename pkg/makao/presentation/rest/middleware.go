@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -32,10 +33,9 @@ func AuthMiddleware() gin.HandlerFunc {
 
 			// if the check function returned true, call `c.Next()` and `return`
 			if isAuthorized {
-				// set the token in the context
-				c.Set(common.AuthTokenContextKey, token)
+				ctx := context.WithValue(c.Request.Context(), common.AuthTokenContextKey, token)
+				c.Request = c.Request.WithContext(ctx)
 
-				// call the next handler
 				c.Next()
 				return
 			}
@@ -58,9 +58,12 @@ func HasValidFirebaseBearerToken(c *gin.Context) (bool, map[string]string, strin
 		return false, utils.ErrorMap(err), ""
 	}
 
-	// TODO: Add token validation logic here
+	validatedToken, err := utils.ValidateJWTToken(bearerToken)
+	if err != nil {
+		return false, utils.ErrorMap(err), ""
+	}
 
-	return true, nil, bearerToken
+	return true, nil, validatedToken.Token
 }
 
 // ExtractBearerToken gets a bearer token from an Authorization header.

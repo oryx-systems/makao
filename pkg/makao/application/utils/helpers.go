@@ -21,7 +21,7 @@ const (
 	// to the console
 	DebugEnvVarName = "DEBUG"
 
-	issuer      = "Oreon Developers"
+	issuer      = "Oryx Developers"
 	accountName = "oreondevelopers@gmail.com"
 )
 

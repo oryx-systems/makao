@@ -23,5 +23,5 @@ const (
 	AppVersion = "0.0.1"
 
 	// AuthTokenContextKey is the key used to store the auth token on the context.Context
-	AuthTokenContextKey = "UID"
+	AuthTokenContextKey = ContextKey("UID")
 )

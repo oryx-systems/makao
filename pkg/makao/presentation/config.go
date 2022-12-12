@@ -122,6 +122,7 @@ func StartGinRouter(ctx context.Context) (*gin.Engine, error) {
 		api.GET("/login_by_phone", h.HandleLoginByPhone())
 		api.POST("/sign_up", h.HandleRegistration())
 		api.GET("/ide", PlaygroundHandler())
+		api.POST("/pin", h.SetUserPIN())
 	}
 
 	// Authenticated routes

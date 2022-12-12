@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 
 	"cloud.google.com/go/errorreporting"
 	"cloud.google.com/go/logging"
@@ -159,4 +161,16 @@ func GetUserTokenFromContext(ctx context.Context) (string, error) {
 	token := val.(string)
 
 	return token, nil
+}
+
+// GetPinExpiryDate returns the expiry date for the given pin
+func GetPinExpiryDate() (*time.Time, error) {
+	pinExpiryDays := MustGetEnvVar("PIN_EXPIRY_DAYS")
+	pinExpiryInt, err := strconv.Atoi(pinExpiryDays)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert PIN expiry days to int: %v", err)
+	}
+	expiryDate := time.Now().AddDate(0, 0, pinExpiryInt)
+
+	return &expiryDate, nil
 }

@@ -26,16 +26,18 @@ type Base struct {
 type User struct {
 	Base
 
-	ID          *string       `gorm:"column:id"`
-	FirstName   string        `gorm:"column:first_name"`
-	MiddleName  string        `gorm:"column:middle_name"`
-	LastName    string        `gorm:"column:last_name"`
-	Active      bool          `gorm:"column:active"`
-	Flavour     enums.Flavour `gorm:"column:flavour"`
-	UserName    string        `gorm:"column:username"`
-	UserType    string        `gorm:"column:user_type"`
-	DeviceToken string        `gorm:"column:device_token"`
-	Residence   string        `gorm:"column:residence"`
+	ID             *string       `gorm:"column:id"`
+	FirstName      string        `gorm:"column:first_name"`
+	MiddleName     string        `gorm:"column:middle_name"`
+	LastName       string        `gorm:"column:last_name"`
+	Active         bool          `gorm:"column:active"`
+	Flavour        enums.Flavour `gorm:"column:flavour"`
+	UserName       string        `gorm:"column:username"`
+	UserType       string        `gorm:"column:user_type"`
+	DeviceToken    string        `gorm:"column:device_token"`
+	Residence      string        `gorm:"column:residence"`
+	UserContact    Contact       `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;not null"`
+	UserIdentifier Identifier    `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;not null"`
 }
 
 // BeforeCreate is a hook run before creating a user
@@ -54,7 +56,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (User) TableName() string {
-	return "user"
+	return "makao_user"
 }
 
 // Contact is a contact model for a user
@@ -80,21 +82,21 @@ func (c *Contact) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (Contact) TableName() string {
-	return "contact"
+	return "makao_contact"
 }
 
 // UserPIN models the user's PIN table
 type UserPIN struct {
 	Base
 
-	ID        string    `gorm:"column:id"`
-	Active    bool      `gorm:"column:active"`
-	Flavour   string    `gorm:"column:flavour"`
-	ValidFrom time.Time `gorm:"column:valid_from"`
-	ValidTo   time.Time `gorm:"column:valid_to"`
-	HashedPIN string    `gorm:"column:hashed_pin"`
-	Salt      string    `gorm:"column:salt"`
-	UserID    string    `gorm:"column:user_id"`
+	ID        string        `gorm:"column:id"`
+	Active    bool          `gorm:"column:active"`
+	Flavour   enums.Flavour `gorm:"column:flavour"`
+	ValidFrom time.Time     `gorm:"column:valid_from"`
+	ValidTo   time.Time     `gorm:"column:valid_to"`
+	HashedPIN string        `gorm:"column:hashed_pin"`
+	Salt      string        `gorm:"column:salt"`
+	UserID    string        `gorm:"column:user_id"`
 }
 
 // BeforeCreate is a hook run before creating user PIN
@@ -108,7 +110,7 @@ func (u *UserPIN) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (UserPIN) TableName() string {
-	return "user_pin"
+	return "makao_user_pin"
 }
 
 // OTP is model for one time password
@@ -134,7 +136,7 @@ func (o *OTP) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (OTP) TableName() string {
-	return "user_otp"
+	return "makao_user_otp"
 }
 
 // Residence models the residence's table
@@ -159,7 +161,7 @@ func (r *Residence) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (Residence) TableName() string {
-	return "residence"
+	return "makao_residence"
 }
 
 // Identifiers models the identifier that may be used in the system
@@ -183,7 +185,7 @@ func (i *Identifier) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (Identifier) TableName() string {
-	return "identifier"
+	return "makao_identifier"
 }
 
 // House models the relationship between a tenant and the living house
@@ -201,7 +203,7 @@ func (h *HouseClient) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (HouseClient) TableName() string {
-	return "house_client"
+	return "makao_house_client"
 }
 
 // House models the datastore entity for a house
@@ -225,7 +227,7 @@ func (h *House) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (House) TableName() string {
-	return "house"
+	return "makao_house"
 }
 
 // Bill represents a billing model
@@ -249,5 +251,23 @@ func (b *Bill) BeforeCreate(tx *gorm.DB) (err error) {
 
 // TableName customizes how the table name is generated
 func (Bill) TableName() string {
-	return "bill"
+	return "makao_bill"
+}
+
+// UserResidence models the relationship between a user and the residence they live in
+type UserResidence struct {
+	ID          string `gorm:"column:id"`
+	UserID      string `gorm:"column:user_id"`
+	ResidenceID string `gorm:"column:residence_id"`
+}
+
+// BeforeCreate is a hook run before creating a house client
+func (ur *UserResidence) BeforeCreate(tx *gorm.DB) (err error) {
+	ur.ID = uuid.New().String()
+	return
+}
+
+// TableName customizes how the table name is generated
+func (UserResidence) TableName() string {
+	return "makao_user_residence"
 }
