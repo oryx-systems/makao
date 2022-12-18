@@ -18,7 +18,7 @@ type UseCasesUser interface {
 	Login(ctx context.Context, loginInput *dto.LoginInput) (*dto.LoginResponse, error)
 	RegisterUser(ctx context.Context, registerInput *dto.RegisterUserInput) error
 	SetUserPIN(ctx context.Context, input *dto.UserPINInput) (bool, error)
-	GetUserResidences(ctx context.Context, userID string) ([]*domain.Residence, error)
+	GetUserResidences(ctx context.Context) ([]*domain.Residence, error)
 }
 
 // UseCasesUserImpl represents the user usecase implementation
@@ -159,6 +159,11 @@ func (u UseCasesUserImpl) SetUserPIN(ctx context.Context, input *dto.UserPINInpu
 }
 
 // GetUserResidences gets the user residences
-func (u UseCasesUserImpl) GetUserResidences(ctx context.Context, userID string) ([]*domain.Residence, error) {
-	return u.infrastructure.Query.GetUserResidencesByUserID(ctx, userID)
+func (u UseCasesUserImpl) GetUserResidences(ctx context.Context) ([]*domain.Residence, error) {
+	uid, err := utils.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.infrastructure.Query.GetUserResidencesByUserID(ctx, uid)
 }

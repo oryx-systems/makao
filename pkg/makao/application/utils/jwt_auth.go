@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/oryx-systems/makao/pkg/makao/application/common"
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
 )
 
@@ -27,7 +30,9 @@ type Claims struct {
 
 // GenerateJWTToken generates a JWT token
 func GenerateJWTToken(userID string) (*TokenResponse, error) {
-
+	if userID == "" {
+		return nil, fmt.Errorf("user id is required")
+	}
 	// Create the Claims
 	claims := &Claims{
 		UserID: userID,
@@ -98,4 +103,27 @@ func ValidateJWTToken(tokenString string) (*TokenResponse, error) {
 		ExpiresIn: claims.ExpiresAt.Time,
 	}, nil
 
+}
+
+// GetLoggedInUser retrieves the logged in user from the context
+func GetLoggedInUser(ctx context.Context) (string, error) {
+	UID := ctx.Value(common.AuthTokenContextKey).(string)
+
+	tkn, err := jwt.ParseWithClaims(UID, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := tkn.Claims.(*Claims)
+	if !ok {
+		return "", err
+	}
+
+	if !tkn.Valid {
+		return "", err
+	}
+
+	return claims.UserID, nil
 }

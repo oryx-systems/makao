@@ -12,10 +12,10 @@ import (
 )
 
 // GetUserResidences is the resolver for the getUserResidences field.
-func (r *queryResolver) GetUserResidences(ctx context.Context, userID string) ([]*domain.Residence, error) {
+func (r *queryResolver) GetUserResidences(ctx context.Context) ([]*domain.Residence, error) {
 	r.checkPreconditions()
 
-	return r.makao.User.GetUserResidences(ctx, userID)
+	return r.makao.User.GetUserResidences(ctx)
 }
 
 // Query returns generated.QueryResolver implementation.
