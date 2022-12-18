@@ -7,10 +7,11 @@ require (
 	cloud.google.com/go/logging v1.6.1
 	cloud.google.com/go/profiler v0.3.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
-	github.com/99designs/gqlgen v0.17.21
+	github.com/99designs/gqlgen v0.17.22
 	github.com/GoogleCloudPlatform/cloudsql-proxy v1.33.1
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
+	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/google/uuid v1.3.0
 	github.com/labstack/gommon v0.4.0
 	github.com/lib/pq v1.10.7

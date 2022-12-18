@@ -1,6 +1,6 @@
 BEGIN;
 
-CREATE TABLE "user" (
+CREATE TABLE "makao_user" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -17,7 +17,7 @@ CREATE TABLE "user" (
   "residence" uuid
 );
 
-CREATE TABLE "contact" (
+CREATE TABLE "makao_contact" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -30,7 +30,7 @@ CREATE TABLE "contact" (
   "user_id" uuid NOT NULL
 );
 
-CREATE TABLE "user_pin" (
+CREATE TABLE "makao_user_pin" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -45,7 +45,7 @@ CREATE TABLE "user_pin" (
   "user_id" uuid NOT NULL
 );
 
-CREATE TABLE "user_otp" (
+CREATE TABLE "makao_user_otp" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -60,7 +60,7 @@ CREATE TABLE "user_otp" (
   "user_id" uuid NOT NULL
 );
 
-CREATE TABLE "residence" (
+CREATE TABLE "makao_residence" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -74,7 +74,7 @@ CREATE TABLE "residence" (
   "owner" uuid NOT NULL
 );
 
-CREATE TABLE "identifier" (
+CREATE TABLE "makao_identifier" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -86,7 +86,7 @@ CREATE TABLE "identifier" (
   "user_id" uuid NOT NULL
 );
 
-CREATE TABLE "house" (
+CREATE TABLE "makao_house" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -99,13 +99,13 @@ CREATE TABLE "house" (
   "rent_value" float NOT NULL
 );
 
-CREATE TABLE "house_client" (
+CREATE TABLE "makao_house_client" (
   "id" uuid PRIMARY KEY,
   "house_id" uuid NOT NULL,
   "tenant_id" uuid NOT NULL
 );
 
-CREATE TABLE "bill" (
+CREATE TABLE "makao_bill" (
   "id" uuid PRIMARY KEY,
   "created_at" timestamp,
   "created_by" uuid,
@@ -118,26 +118,38 @@ CREATE TABLE "bill" (
   "user_id" uuid NOT NULL
 );
 
-CREATE UNIQUE INDEX ON "contact" ("flavour", "contact_value");
+CREATE TABLE "makao_user_residence" (
+  "id" uuid PRIMARY KEY,
+  "user_id" uuid NOT NULL,
+  "residence_id" uuid NOT NULL
+);
 
-CREATE UNIQUE INDEX ON "identifier" ("identifier_type", "identifier_value");
+CREATE UNIQUE INDEX ON "makao_contact" ("flavour", "contact_value");
 
-CREATE UNIQUE INDEX ON "bill" ("type", "user_id");
+CREATE UNIQUE INDEX ON "makao_identifier" ("identifier_type", "identifier_value");
 
-ALTER TABLE "contact" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+CREATE UNIQUE INDEX ON "makao_bill" ("type", "user_id");
 
-ALTER TABLE "user_pin" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+CREATE UNIQUE INDEX ON "makao_user_residence" ("user_id", "residence_id");
 
-ALTER TABLE "user_otp" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "makao_contact" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user" ("id");
 
-ALTER TABLE "residence" ADD FOREIGN KEY ("owner") REFERENCES "user" ("id");
+ALTER TABLE "makao_user_pin" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user" ("id");
 
-ALTER TABLE "identifier" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "makao_user_otp" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user" ("id");
 
-ALTER TABLE "house_client" ADD FOREIGN KEY ("house_id") REFERENCES "house" ("id");
+ALTER TABLE "makao_residence" ADD FOREIGN KEY ("owner") REFERENCES "makao_user" ("id");
 
-ALTER TABLE "house_client" ADD FOREIGN KEY ("tenant_id") REFERENCES "user" ("id");
+ALTER TABLE "makao_identifier" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user" ("id");
 
-ALTER TABLE "bill" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "makao_house_client" ADD FOREIGN KEY ("house_id") REFERENCES "makao_house" ("id");
+
+ALTER TABLE "makao_house_client" ADD FOREIGN KEY ("tenant_id") REFERENCES "makao_user" ("id");
+
+ALTER TABLE "makao_bill" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user" ("id");
+
+ALTER TABLE "makao_user_residence" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user" ("id");
+
+ALTER TABLE "makao_user_residence" ADD FOREIGN KEY ("residence_id") REFERENCES "makao_residence" ("id");
 
 COMMIT;

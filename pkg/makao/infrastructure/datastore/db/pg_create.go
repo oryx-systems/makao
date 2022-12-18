@@ -2,13 +2,14 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/oryx-systems/makao/pkg/makao/domain"
 	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore/db/gorm"
 )
 
 // RegisterUser registers a new user in the database
-func (p *DbServiceImpl) RegisterUser(ctx context.Context, user *domain.User, contact *domain.Contact, identifier *domain.Identifier) error {
+func (d *DbServiceImpl) RegisterUser(ctx context.Context, user *domain.User, contact *domain.Contact, identifier *domain.Identifier) error {
 	usr := &gorm.User{
 		FirstName:   user.FirstName,
 		MiddleName:  user.MiddleName,
@@ -36,11 +37,11 @@ func (p *DbServiceImpl) RegisterUser(ctx context.Context, user *domain.User, con
 		UserID:          usr.ID,
 	}
 
-	return p.Repository.RegisterUser(ctx, usr, ct, id)
+	return d.Repository.RegisterUser(ctx, usr, ct, id)
 }
 
 // SaveOTP saves an OTP in the database
-func (p *DbServiceImpl) SaveOTP(ctx context.Context, otp *domain.OTP) error {
+func (d *DbServiceImpl) SaveOTP(ctx context.Context, otp *domain.OTP) error {
 	otpData := &gorm.OTP{
 		IsValid:     otp.IsValid,
 		ValidUntil:  otp.ValidUntil,
@@ -51,5 +52,25 @@ func (p *DbServiceImpl) SaveOTP(ctx context.Context, otp *domain.OTP) error {
 		UserID:      otp.UserID,
 	}
 
-	return p.Repository.SaveOTP(ctx, otpData)
+	return d.Repository.SaveOTP(ctx, otpData)
+}
+
+// SavePIN saves a PIN in the database
+func (d *DbServiceImpl) SavePIN(ctx context.Context, pinInput *domain.UserPIN) (bool, error) {
+	pinObj := &gorm.UserPIN{
+		UserID:    pinInput.UserID,
+		HashedPIN: pinInput.HashedPIN,
+		ValidFrom: pinInput.ValidFrom,
+		ValidTo:   pinInput.ValidTo,
+		Active:    pinInput.Active,
+		Flavour:   pinInput.Flavour,
+		Salt:      pinInput.Salt,
+	}
+
+	_, err := d.Repository.SavePIN(ctx, pinObj)
+	if err != nil {
+		return false, fmt.Errorf("failed to save user pin: %v", err)
+	}
+
+	return true, nil
 }

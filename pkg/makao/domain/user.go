@@ -7,19 +7,25 @@ import (
 )
 
 type User struct {
-	ID                         string               `json:"id"`
-	IdentificationDocumentType enums.IdentifierType `json:"identification_type"`
-	NationalID                 string               `json:"national_id"`
-	PassportNumber             string               `json:"passport_number"`
-	FirstName                  string               `json:"first_name"`
-	MiddleName                 string               `json:"middle_name"`
-	LastName                   string               `json:"last_name"`
-	Active                     bool                 `json:"active"`
-	Flavour                    enums.Flavour        `json:"flavour"`
-	UserName                   string               `json:"username"`
-	UserType                   string               `json:"user_type"`
-	DeviceToken                string               `json:"device_token"`
-	Residence                  string               `json:"residence"`
+	ID              string          `json:"id"`
+	FirstName       string          `json:"first_name"`
+	MiddleName      string          `json:"middle_name"`
+	LastName        string          `json:"last_name"`
+	Active          bool            `json:"active"`
+	Flavour         enums.Flavour   `json:"flavour"`
+	UserName        string          `json:"username"`
+	UserType        string          `json:"user_type"`
+	UserIdentifier  Identifier      `json:"user_identifier"`
+	UserContact     Contact         `json:"user_contact"`
+	DeviceToken     string          `json:"device_token"`
+	Residence       string          `json:"residence"`
+	AuthCredentials AuthCredentials `json:"auth_credentials"`
+}
+
+type AuthCredentials struct {
+	RefreshToken string    `json:"refreshToken"`
+	IDToken      string    `json:"idToken"`
+	ExpiresIn    time.Time `json:"expiresIn"`
 }
 
 type Contact struct {
@@ -32,14 +38,14 @@ type Contact struct {
 }
 
 type UserPIN struct {
-	ID        string    `json:"id"`
-	Active    bool      `json:"active"`
-	Flavour   string    `json:"flavour"`
-	ValidFrom time.Time `json:"valid_from"`
-	ValidTo   time.Time `json:"valid_to"`
-	HashedPIN string    `json:"hashed_pin"`
-	Salt      string    `json:"salt"`
-	UserID    string    `json:"user_id"`
+	ID        string        `json:"id"`
+	Active    bool          `json:"active"`
+	Flavour   enums.Flavour `json:"flavour"`
+	ValidFrom time.Time     `json:"valid_from"`
+	ValidTo   time.Time     `json:"valid_to"`
+	HashedPIN string        `json:"hashed_pin"`
+	Salt      string        `json:"salt"`
+	UserID    string        `json:"user_id"`
 }
 
 type Identifier struct {

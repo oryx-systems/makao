@@ -8,6 +8,7 @@ import (
 type Create interface {
 	RegisterUser(ctx context.Context, user *User, contact *Contact, identifier *Identifier) error
 	SaveOTP(ctx context.Context, otp *OTP) error
+	SavePIN(ctx context.Context, pinData *UserPIN) (bool, error)
 }
 
 // RegisterUser creates a new user record.
@@ -50,4 +51,13 @@ func (db *PGInstance) SaveOTP(ctx context.Context, otp *OTP) error {
 	}
 
 	return nil
+}
+
+// SavePIN saves a pin in the database
+func (db *PGInstance) SavePIN(ctx context.Context, pinData *UserPIN) (bool, error) {
+	if err := db.DB.WithContext(ctx).Create(&pinData).Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

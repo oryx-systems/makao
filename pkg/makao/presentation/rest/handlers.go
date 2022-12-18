@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,7 @@ var AcceptedContentTypes = []string{"application/json", "application/x-www-form-
 type PresentationHandlers interface {
 	HandleLoginByPhone() gin.HandlerFunc
 	HandleRegistration() gin.HandlerFunc
+	SetUserPIN() gin.HandlerFunc
 }
 
 // PresentationHandlersImpl represents the usecase implementation object
@@ -60,29 +62,53 @@ func (p PresentationHandlersImpl) HandleRegistration() gin.HandlerFunc {
 // HandleRegistration handles the user registration
 func (p PresentationHandlersImpl) HandleLoginByPhone() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// ctx := c.Request.Context()
-		// c.Accepted = append(c.Accepted, AcceptedContentTypes...)
+		ctx := c.Request.Context()
+		c.Accepted = append(c.Accepted, AcceptedContentTypes...)
 
-		// payload := &dto.IncomingSMSPayload{}
-		// err := c.Request.ParseForm()
-		// if err != nil {
-		// 	utils.ReportErr(c.Writer, err, http.StatusBadRequest)
-		// }
+		payload := &dto.LoginInput{}
+		utils.DecodeJSONToTargetStruct(c.Writer, c.Request, payload)
+		if payload.PhoneNumber == "" {
+			err := fmt.Errorf("phone number is required")
+			utils.ReportErr(c.Writer, err, http.StatusBadRequest)
+			return
+		}
 
-		// payload.ID = c.Request.Form.Get("id")
-		// payload.LinkID = c.Request.Form.Get("linkId")
-		// payload.Date = c.Request.Form.Get("date")
-		// payload.From = c.Request.Form.Get("from")
-		// payload.To = c.Request.Form.Get("to")
-		// payload.Text = c.Request.Form.Get("text")
-		// payload.NetworkCode = c.Request.Form.Get("networkCode")
+		response, err := p.usecases.User.Login(ctx, payload)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
-		// err = p.usecases.HandleIncomingMessages(ctx, payload)
-		// if err != nil {
-		// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		// 	return
-		// }
+		c.JSON(http.StatusOK, gin.H{
+			"status":   "Successfully logged in user",
+			"response": response,
+		})
+	}
+}
 
-		c.JSON(http.StatusOK, gin.H{"status": "Successfully processed short code sms"})
+// SetUserPIN handles the setting of the user PIN
+func (p PresentationHandlersImpl) SetUserPIN() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		c.Accepted = append(c.Accepted, AcceptedContentTypes...)
+
+		payload := &dto.UserPINInput{}
+		utils.DecodeJSONToTargetStruct(c.Writer, c.Request, payload)
+		if payload.UserID == "" {
+			err := fmt.Errorf("user ID is required")
+			utils.ReportErr(c.Writer, err, http.StatusBadRequest)
+			return
+		}
+
+		ok, err := p.usecases.User.SetUserPIN(ctx, payload)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"setPIN": ok,
+			"status": "Successfully set user PIN",
+		})
 	}
 }

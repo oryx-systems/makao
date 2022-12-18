@@ -40,20 +40,15 @@ func NewUseCaseOTP(infra infrastructure.Datastore) UseCasesOTP {
 
 // GenerateAndSendOTP generates and sends an OTP to the user
 func (o *UseCasesOTPImpl) GenerateAndSendOTP(ctx context.Context, phoneNumber string, flavour enums.Flavour) (string, error) {
-	// Logged in user
-	uid, err := o.Ext.GetLoggedInUserUID(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	logrus.Print("THE LOGGED IN USER ID IS: ", uid)
-
 	validatePhoneNumber, err := helpers.NormalizeMSISDN(phoneNumber)
 	if err != nil {
 		return "", err
 	}
 
-	// TODO: Implement get user profile by phone number
+	userProfile, err := o.infrastructure.Query.GetUserProfileByPhoneNumber(ctx, *validatePhoneNumber, flavour)
+	if err != nil {
+		return "", err
+	}
 
 	if !flavour.IsValid() {
 		return "", fmt.Errorf("invalid flavour")
@@ -82,7 +77,7 @@ func (o *UseCasesOTPImpl) GenerateAndSendOTP(ctx context.Context, phoneNumber st
 		OTP:         otp,
 		Flavour:     flavour,
 		Medium:      "SMS",
-		UserID:      "ad2ba725-dd9b-4e1b-ae5d-b10d5d852ff4", // TODO: Get the user id from the user profile from 1 above
+		UserID:      userProfile.ID,
 	}
 
 	// Save the OTP to the database

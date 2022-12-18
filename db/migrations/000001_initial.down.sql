@@ -1,7 +1,7 @@
 BEGIN;
 
 ALTER TABLE
-    IF EXISTS "contact"
+    IF EXISTS "makao_contact"
     DROP CONSTRAINT IF EXISTS "user_id";
 
 COMMIT;

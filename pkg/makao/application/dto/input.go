@@ -4,8 +4,9 @@ import "github.com/oryx-systems/makao/pkg/makao/application/enums"
 
 // LoginInput represents the login input
 type LoginInput struct {
-	Phone string `json:"phone"`
-	PIN   string `json:"pin"`
+	PhoneNumber string        `json:"phone_number"`
+	PIN         string        `json:"pin"`
+	Flavour     enums.Flavour `json:"flavour"`
 }
 
 // RegisterUserInput represents the register user input
@@ -20,4 +21,14 @@ type RegisterUserInput struct {
 	UserName                     string               `json:"username"`
 	DeviceToken                  string               `json:"device_token"`
 	Residence                    string               `json:"residence"`
+	PIN                          string               `json:"pin"`
+	ConfirmPIN                   string               `json:"confirm_pin"`
+}
+
+// UserPINInput represents the user pin input
+type UserPINInput struct {
+	UserID     string        `json:"user_id"`
+	PIN        string        `json:"pin"`
+	ConfirmPIN string        `json:"confirm_pin"`
+	Flavour    enums.Flavour `json:"flavour"`
 }

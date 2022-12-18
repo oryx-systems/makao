@@ -1,0 +1,9 @@
+type Residence {
+    id: String!
+	active: Boolean!
+    name: String!
+    registrationNumber: String!
+    location: String!
+    livingRoomsCount: Int!
+    owner: String!
+}
