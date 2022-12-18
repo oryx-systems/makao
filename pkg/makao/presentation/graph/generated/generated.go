@@ -51,7 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetUserResidences  func(childComplexity int, userID string) int
+		GetUserResidences  func(childComplexity int) int
 		__resolve__service func(childComplexity int) int
 	}
 
@@ -74,7 +74,7 @@ type MutationResolver interface {
 	SendOtp(ctx context.Context, phoneNumber string, flavour enums.Flavour) (string, error)
 }
 type QueryResolver interface {
-	GetUserResidences(ctx context.Context, userID string) ([]*domain.Residence, error)
+	GetUserResidences(ctx context.Context) ([]*domain.Residence, error)
 }
 
 type executableSchema struct {
@@ -109,12 +109,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_getUserResidences_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetUserResidences(childComplexity, args["userId"].(string)), true
+		return e.complexity.Query.GetUserResidences(childComplexity), true
 
 	case "Query._service":
 		if e.complexity.Query.__resolve__service == nil {
@@ -265,7 +260,7 @@ var sources = []*ast.Source{
 }`, BuiltIn: false},
 	{Name: "../user.graphql", Input: `
 extend type Query {
-  getUserResidences(userId: ID!): [Residence!]!
+  getUserResidences: [Residence!]!
 }`, BuiltIn: false},
 	{Name: "../../../../../federation/directives.graphql", Input: `
 	scalar _Any
@@ -330,21 +325,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getUserResidences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["userId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userId"] = arg0
 	return args, nil
 }
 
@@ -455,7 +435,7 @@ func (ec *executionContext) _Query_getUserResidences(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUserResidences(rctx, fc.Args["userId"].(string))
+		return ec.resolvers.Query().GetUserResidences(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -497,17 +477,6 @@ func (ec *executionContext) fieldContext_Query_getUserResidences(ctx context.Con
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Residence", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getUserResidences_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
 	}
 	return fc, nil
 }
@@ -3382,21 +3351,6 @@ func (ec *executionContext) unmarshalNFlavour2githubᚗcomᚋoryxᚑsystemsᚋma
 
 func (ec *executionContext) marshalNFlavour2githubᚗcomᚋoryxᚑsystemsᚋmakaoᚋpkgᚋmakaoᚋapplicationᚋenumsᚐFlavour(ctx context.Context, sel ast.SelectionSet, v enums.Flavour) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
