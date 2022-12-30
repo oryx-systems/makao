@@ -37,7 +37,7 @@ func (d *DbServiceImpl) RegisterUser(ctx context.Context, user *domain.User, con
 		UserID:          usr.ID,
 	}
 
-	return d.Repository.RegisterUser(ctx, usr, ct, id)
+	return d.create.RegisterUser(ctx, usr, ct, id)
 }
 
 // SaveOTP saves an OTP in the database
@@ -52,7 +52,7 @@ func (d *DbServiceImpl) SaveOTP(ctx context.Context, otp *domain.OTP) error {
 		UserID:      otp.UserID,
 	}
 
-	return d.Repository.SaveOTP(ctx, otpData)
+	return d.create.SaveOTP(ctx, otpData)
 }
 
 // SavePIN saves a PIN in the database
@@ -67,7 +67,7 @@ func (d *DbServiceImpl) SavePIN(ctx context.Context, pinInput *domain.UserPIN) (
 		Salt:      pinInput.Salt,
 	}
 
-	_, err := d.Repository.SavePIN(ctx, pinObj)
+	_, err := d.create.SavePIN(ctx, pinObj)
 	if err != nil {
 		return false, fmt.Errorf("failed to save user pin: %v", err)
 	}

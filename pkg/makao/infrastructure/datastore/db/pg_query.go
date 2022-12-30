@@ -10,7 +10,7 @@ import (
 
 // GetUserProfileByUserID fetches and returns a userprofile using their user ID
 func (d *DbServiceImpl) GetUserProfileByUserID(ctx context.Context, userID string) (*domain.User, error) {
-	user, err := d.Repository.GetUserProfileByUserID(ctx, &userID)
+	user, err := d.query.GetUserProfileByUserID(ctx, &userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user profile by user ID: %v", err)
 	}
@@ -54,7 +54,7 @@ func (d *DbServiceImpl) GetUserProfileByPhoneNumber(ctx context.Context, phoneNu
 		return nil, fmt.Errorf("phone number should be provided")
 	}
 
-	user, err := d.Repository.GetUserProfileByPhoneNumber(ctx, phoneNumber, flavour)
+	user, err := d.query.GetUserProfileByPhoneNumber(ctx, phoneNumber, flavour)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user profile by phonenumber: %v", err)
 	}
@@ -97,7 +97,7 @@ func (d *DbServiceImpl) GetUserPINByUserID(ctx context.Context, userID string, f
 	if userID == "" {
 		return nil, fmt.Errorf("user id cannot be empty")
 	}
-	pinData, err := d.Repository.GetUserPINByUserID(ctx, userID, flavour)
+	pinData, err := d.query.GetUserPINByUserID(ctx, userID, flavour)
 	if err != nil {
 		return nil, fmt.Errorf("failed query and retrieve user PIN data: %s", err)
 	}
@@ -117,13 +117,13 @@ func (d *DbServiceImpl) GetUserPINByUserID(ctx context.Context, userID string, f
 func (d *DbServiceImpl) GetUserResidencesByUserID(ctx context.Context, userID string) ([]*domain.Residence, error) {
 	var userResidences []*domain.Residence
 
-	records, err := d.Repository.GetUserResidencesByUserID(ctx, userID)
+	records, err := d.query.GetUserResidencesByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user residences by user ID: %v", err)
 	}
 
 	for _, record := range records {
-		residence, err := d.Repository.GetResidenceByID(ctx, record.ID)
+		residence, err := d.query.GetResidenceByID(ctx, record.ID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get residence by ID: %v", err)
 		}

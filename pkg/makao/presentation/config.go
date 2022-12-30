@@ -13,11 +13,14 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
-	"github.com/oryx-systems/makao/pkg/makao/infrastructure"
+	pgDB "github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore/db"
+	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore/db/gorm"
 	"github.com/oryx-systems/makao/pkg/makao/presentation/graph"
 	"github.com/oryx-systems/makao/pkg/makao/presentation/graph/generated"
 	"github.com/oryx-systems/makao/pkg/makao/presentation/rest"
 	"github.com/oryx-systems/makao/pkg/makao/usecases"
+	"github.com/oryx-systems/makao/pkg/makao/usecases/otp"
+	"github.com/oryx-systems/makao/pkg/makao/usecases/user"
 )
 
 const serverTimeoutSeconds = 120
@@ -113,9 +116,18 @@ func StartGinRouter(ctx context.Context) (*gin.Engine, error) {
 	r := gin.Default()
 	r.Use(gin.Recovery())
 
-	infrastructure := infrastructure.NewInfrastructureInteractor()
-	usecases := usecases.NewMakaoUsecase(*infrastructure)
-	h := rest.NewPresentationHandlers(*infrastructure, *usecases)
+	pg, err := gorm.NewPGInstance()
+	if err != nil {
+		return nil, fmt.Errorf("can't instantiate repository in resolver: %v", err)
+	}
+
+	db := pgDB.NewDBService(pg, pg, pg)
+
+	userUsecase := user.NewUseCasesUser(db, db, db)
+	otpUsecase := otp.NewUseCaseOTP(db, db)
+
+	usecases := usecases.NewMakaoUsecase(userUsecase, otpUsecase)
+	h := rest.NewPresentationHandlers(*usecases)
 
 	api := r.Group("/v1/api")
 	{
