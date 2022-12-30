@@ -8,7 +8,6 @@ import (
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
 	"github.com/oryx-systems/makao/pkg/makao/application/dto"
 	"github.com/oryx-systems/makao/pkg/makao/application/utils"
-	"github.com/oryx-systems/makao/pkg/makao/infrastructure"
 	"github.com/oryx-systems/makao/pkg/makao/usecases"
 )
 
@@ -24,13 +23,12 @@ type PresentationHandlers interface {
 
 // PresentationHandlersImpl represents the usecase implementation object
 type PresentationHandlersImpl struct {
-	usecases       usecases.Makao
-	infrastructure infrastructure.Datastore
+	usecases usecases.Makao
 }
 
 // NewPresentationHandlers initializes a new rest handlers usecase
-func NewPresentationHandlers(infrastructure infrastructure.Datastore, usecases usecases.Makao) PresentationHandlers {
-	return &PresentationHandlersImpl{infrastructure: infrastructure, usecases: usecases}
+func NewPresentationHandlers(usecases usecases.Makao) PresentationHandlers {
+	return &PresentationHandlersImpl{usecases: usecases}
 }
 
 // HandleIncomingMessages handles and processes data posted by AIT to its callback URL

@@ -10,7 +10,7 @@ import (
 	"github.com/oryx-systems/makao/pkg/makao/application/extension"
 	"github.com/oryx-systems/makao/pkg/makao/application/utils"
 	"github.com/oryx-systems/makao/pkg/makao/domain"
-	"github.com/oryx-systems/makao/pkg/makao/infrastructure"
+	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,16 +25,21 @@ type UseCasesOTP interface {
 
 // UseCasesOTPImpl represents the user otp usecase implementation
 type UseCasesOTPImpl struct {
-	infrastructure infrastructure.Datastore
-	Ext            extension.Extension
+	Create datastore.Create
+	Query  datastore.Query
+	Ext    extension.Extension
 }
 
 // NewUseCaseOTP initializes the new otp implementation
-func NewUseCaseOTP(infra infrastructure.Datastore) UseCasesOTP {
+func NewUseCaseOTP(
+	create datastore.Create,
+	query datastore.Query,
+) UseCasesOTP {
 	ext := extension.NewExtension()
 	return &UseCasesOTPImpl{
-		infrastructure: infra,
-		Ext:            ext,
+		Create: create,
+		Query:  query,
+		Ext:    ext,
 	}
 }
 
@@ -45,7 +50,7 @@ func (o *UseCasesOTPImpl) GenerateAndSendOTP(ctx context.Context, phoneNumber st
 		return "", err
 	}
 
-	userProfile, err := o.infrastructure.Query.GetUserProfileByPhoneNumber(ctx, *validatePhoneNumber, flavour)
+	userProfile, err := o.Query.GetUserProfileByPhoneNumber(ctx, *validatePhoneNumber, flavour)
 	if err != nil {
 		return "", err
 	}
@@ -81,7 +86,7 @@ func (o *UseCasesOTPImpl) GenerateAndSendOTP(ctx context.Context, phoneNumber st
 	}
 
 	// Save the OTP to the database
-	err = o.infrastructure.Create.SaveOTP(ctx, otpData)
+	err = o.Create.SaveOTP(ctx, otpData)
 	if err != nil {
 		return "", err
 	}

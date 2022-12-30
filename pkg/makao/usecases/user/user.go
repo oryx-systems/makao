@@ -10,7 +10,7 @@ import (
 	"github.com/oryx-systems/makao/pkg/makao/application/enums"
 	"github.com/oryx-systems/makao/pkg/makao/application/utils"
 	"github.com/oryx-systems/makao/pkg/makao/domain"
-	"github.com/oryx-systems/makao/pkg/makao/infrastructure"
+	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore"
 )
 
 // UseCasesUser represents all the user business logic
@@ -23,24 +23,32 @@ type UseCasesUser interface {
 
 // UseCasesUserImpl represents the user usecase implementation
 type UseCasesUserImpl struct {
-	infrastructure infrastructure.Datastore
+	Create datastore.Create
+	Query  datastore.Query
+	Update datastore.Update
 }
 
 // NewUseCasesUser initializes the new user implementation
-func NewUseCasesUser(infra infrastructure.Datastore) UseCasesUser {
+func NewUseCasesUser(
+	create datastore.Create,
+	query datastore.Query,
+	update datastore.Update,
+) UseCasesUser {
 	return &UseCasesUserImpl{
-		infrastructure: infra,
+		Create: create,
+		Query:  query,
+		Update: update,
 	}
 }
 
 // HandleIncomingMessages receives ang processes the incoming SMS data
 func (u UseCasesUserImpl) Login(ctx context.Context, loginInput *dto.LoginInput) (*dto.LoginResponse, error) {
-	user, err := u.infrastructure.Query.GetUserProfileByPhoneNumber(ctx, loginInput.PhoneNumber, loginInput.Flavour)
+	user, err := u.Query.GetUserProfileByPhoneNumber(ctx, loginInput.PhoneNumber, loginInput.Flavour)
 	if err != nil {
 		return nil, err
 	}
 
-	userPIN, err := u.infrastructure.Query.GetUserPINByUserID(ctx, user.ID, user.Flavour)
+	userPIN, err := u.Query.GetUserPINByUserID(ctx, user.ID, user.Flavour)
 	if err != nil {
 		return nil, err
 	}
@@ -113,12 +121,12 @@ func (u UseCasesUserImpl) RegisterUser(ctx context.Context, registerInput *dto.R
 		IdentifierValue: registerInput.IdentificationDocumentNumber,
 	}
 
-	return u.infrastructure.Create.RegisterUser(ctx, user, contact, identifier)
+	return u.Create.RegisterUser(ctx, user, contact, identifier)
 }
 
 // SetUserPIN sets the user pin
 func (u UseCasesUserImpl) SetUserPIN(ctx context.Context, input *dto.UserPINInput) (bool, error) {
-	userProfile, err := u.infrastructure.Query.GetUserProfileByUserID(ctx, input.UserID)
+	userProfile, err := u.Query.GetUserProfileByUserID(ctx, input.UserID)
 	if err != nil {
 		return false, fmt.Errorf("failed to get a user profile by user ID: %v", err)
 	}
@@ -150,7 +158,7 @@ func (u UseCasesUserImpl) SetUserPIN(ctx context.Context, input *dto.UserPINInpu
 		Salt:      salt,
 	}
 
-	_, err = u.infrastructure.Create.SavePIN(ctx, pinDataPayload)
+	_, err = u.Create.SavePIN(ctx, pinDataPayload)
 	if err != nil {
 		return false, err
 	}
@@ -165,5 +173,5 @@ func (u UseCasesUserImpl) GetUserResidences(ctx context.Context) ([]*domain.Resi
 		return nil, err
 	}
 
-	return u.infrastructure.Query.GetUserResidencesByUserID(ctx, uid)
+	return u.Query.GetUserResidencesByUserID(ctx, uid)
 }

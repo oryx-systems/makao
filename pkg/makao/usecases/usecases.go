@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"github.com/oryx-systems/makao/pkg/makao/infrastructure"
 	"github.com/oryx-systems/makao/pkg/makao/usecases/otp"
 	"github.com/oryx-systems/makao/pkg/makao/usecases/user"
 )
@@ -14,10 +13,9 @@ type Makao struct {
 
 // NewUseCasesInteractor initializes a new usecases interactor
 func NewMakaoUsecase(
-	infrastructure infrastructure.Datastore,
+	user user.UseCasesUser,
+	otp otp.UseCasesOTP,
 ) *Makao {
-	user := user.NewUseCasesUser(infrastructure)
-	otp := otp.NewUseCaseOTP(infrastructure)
 
 	m := &Makao{
 		User: user,

@@ -14,5 +14,5 @@ func (d *DbServiceImpl) InvalidatePIN(ctx context.Context, userID string, flavou
 		return false, fmt.Errorf("userID cannot be empty")
 	}
 
-	return d.Repository.InvalidatePIN(ctx, userID, flavour)
+	return d.update.InvalidatePIN(ctx, userID, flavour)
 }
