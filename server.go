@@ -23,7 +23,7 @@ func main() {
 	if err != nil {
 		helpers.LogStartupError(ctx, err)
 	}
-	srv := presentation.PrepareServer(ctx, port, presentation.SMSServiceAllowedOrigins)
+	srv := presentation.PrepareServer(ctx, port, presentation.MakaoServiceAllowedOrigins)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
 			helpers.LogStartupError(ctx, err)
