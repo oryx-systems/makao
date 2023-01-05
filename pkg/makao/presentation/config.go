@@ -25,15 +25,14 @@ import (
 
 const serverTimeoutSeconds = 120
 
-// SMSServiceAllowedOrigins is a list of CORS origins allowed to interact with
-// this service
-var SMSServiceAllowedOrigins = []string{
+// MakaoServiceAllowedOrigins is a list of CORS origins allowed to interact with this service
+var MakaoServiceAllowedOrigins = []string{
 	"http://localhost:8080",
 }
 
-// SMSServiceAllowedHeaders is a list of CORS allowed headers for the clinical
+// MakaoServiceAllowedHeaders is a list of CORS allowed headers for the clinical
 // service
-var SMSServiceAllowedHeaders = []string{
+var MakaoServiceAllowedHeaders = []string{
 	"Accept",
 	"Accept-Charset",
 	"Accept-Language",
@@ -61,8 +60,8 @@ func PrepareServer(
 
 	// Set allowed origins
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     SMSServiceAllowedOrigins,
-		AllowHeaders:     SMSServiceAllowedHeaders,
+		AllowOrigins:     MakaoServiceAllowedOrigins,
+		AllowHeaders:     MakaoServiceAllowedHeaders,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowCredentials: true,
 	}))
