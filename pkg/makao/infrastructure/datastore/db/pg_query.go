@@ -50,10 +50,6 @@ func (d *DbServiceImpl) GetUserProfileByUserID(ctx context.Context, userID strin
 
 // GetUserProfileByPhoneNumber fetches and returns a userprofile using their phone number
 func (d *DbServiceImpl) GetUserProfileByPhoneNumber(ctx context.Context, phoneNumber string, flavour enums.Flavour) (*domain.User, error) {
-	if phoneNumber == "" {
-		return nil, fmt.Errorf("phone number should be provided")
-	}
-
 	user, err := d.query.GetUserProfileByPhoneNumber(ctx, phoneNumber, flavour)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user profile by phonenumber: %v", err)
