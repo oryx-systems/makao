@@ -19,6 +19,7 @@ type UseCasesUser interface {
 	RegisterUser(ctx context.Context, registerInput *dto.RegisterUserInput) error
 	SetUserPIN(ctx context.Context, input *dto.UserPINInput) (bool, error)
 	GetUserResidences(ctx context.Context) ([]*domain.Residence, error)
+	SearchUserByPhoneNumber(ctx context.Context, phoneNumber string) (*domain.User, error)
 }
 
 // UseCasesUserImpl represents the user usecase implementation
@@ -174,4 +175,14 @@ func (u UseCasesUserImpl) GetUserResidences(ctx context.Context) ([]*domain.Resi
 	}
 
 	return u.Query.GetUserResidencesByUserID(ctx, uid)
+}
+
+// SearchUserByPhoneNumber searches a user by phone number
+func (u UseCasesUserImpl) SearchUserByPhoneNumber(ctx context.Context, phoneNumber string) (*domain.User, error) {
+	normalizedPhone, err := helpers.NormalizeMSISDN(phoneNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.Query.GetUserProfileByPhoneNumber(ctx, *normalizedPhone, enums.FlavourConsumer)
 }

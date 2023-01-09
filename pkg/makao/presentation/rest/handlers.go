@@ -19,6 +19,7 @@ type PresentationHandlers interface {
 	HandleLoginByPhone() gin.HandlerFunc
 	HandleRegistration() gin.HandlerFunc
 	SetUserPIN() gin.HandlerFunc
+	GetUserProfileByPhoneNumber() gin.HandlerFunc
 }
 
 // PresentationHandlersImpl represents the usecase implementation object
@@ -107,6 +108,33 @@ func (p PresentationHandlersImpl) SetUserPIN() gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"setPIN": ok,
 			"status": "Successfully set user PIN",
+		})
+	}
+}
+
+// GetUserProfileByPhoneNumberuser search
+func (p PresentationHandlersImpl) GetUserProfileByPhoneNumber() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		c.Accepted = append(c.Accepted, AcceptedContentTypes...)
+
+		// get phone from query params and validate
+		phone := c.Query("phoneNumber")
+		if phone == "" {
+			err := fmt.Errorf("phone number is required")
+			utils.ReportErr(c.Writer, err, http.StatusBadRequest)
+			return
+		}
+
+		users, err := p.usecases.User.SearchUserByPhoneNumber(ctx, phone)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "Successfully searched for users",
+			"users":  users,
 		})
 	}
 }

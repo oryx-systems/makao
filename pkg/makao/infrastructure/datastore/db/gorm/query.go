@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/oryx-systems/makao/pkg/makao/application/enums"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm/clause"
 )
 
@@ -30,6 +31,7 @@ func (db *PGInstance) GetUserProfileByUserID(ctx context.Context, userID *string
 func (db *PGInstance) GetUserProfileByPhoneNumber(ctx context.Context, phoneNumber string, flavour enums.Flavour) (*User, error) {
 	var user User
 
+	logrus.Println("phoneNumber: ", phoneNumber)
 	if err := db.DB.Joins("JOIN makao_contact on makao_user.id = makao_contact.user_id").Where("makao_contact.contact_value = ? AND makao_contact.flavour = ?", phoneNumber, flavour).Preload(clause.Associations).First(&user).Error; err != nil {
 		return nil, fmt.Errorf("failed to get user by phonenumber %v: %v", phoneNumber, err)
 	}
