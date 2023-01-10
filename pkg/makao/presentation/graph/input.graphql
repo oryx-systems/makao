@@ -1,0 +1,7 @@
+input ResidenceInput {
+    name: String!
+    registrationNumber: String!
+    location: String!
+    livingRoomsCount: Int!
+    owner: ID!
+}

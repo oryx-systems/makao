@@ -12,6 +12,7 @@ type Create interface {
 	RegisterUser(ctx context.Context, user *domain.User, contact *domain.Contact, identifier *domain.Identifier) error
 	SaveOTP(ctx context.Context, otp *domain.OTP) error
 	SavePIN(ctx context.Context, pinInput *domain.UserPIN) (bool, error)
+	CreateResidence(ctx context.Context, payload domain.Residence) (*domain.Residence, error)
 }
 
 // Query hold a collection of methods to interact with the querying of any data

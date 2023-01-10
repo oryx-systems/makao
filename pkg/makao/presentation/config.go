@@ -20,6 +20,7 @@ import (
 	"github.com/oryx-systems/makao/pkg/makao/presentation/rest"
 	"github.com/oryx-systems/makao/pkg/makao/usecases"
 	"github.com/oryx-systems/makao/pkg/makao/usecases/otp"
+	"github.com/oryx-systems/makao/pkg/makao/usecases/residence"
 	"github.com/oryx-systems/makao/pkg/makao/usecases/user"
 )
 
@@ -124,8 +125,9 @@ func StartGinRouter(ctx context.Context) (*gin.Engine, error) {
 
 	userUsecase := user.NewUseCasesUser(db, db, db)
 	otpUsecase := otp.NewUseCaseOTP(db, db)
+	residenceUsecase := residence.NewResidence(db)
 
-	usecases := usecases.NewMakaoUsecase(userUsecase, otpUsecase)
+	usecases := usecases.NewMakaoUsecase(userUsecase, otpUsecase, residenceUsecase)
 	h := rest.NewPresentationHandlers(*usecases)
 
 	api := r.Group("/v1/api")

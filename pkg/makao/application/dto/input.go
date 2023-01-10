@@ -32,3 +32,12 @@ type UserPINInput struct {
 	ConfirmPIN string        `json:"confirm_pin"`
 	Flavour    enums.Flavour `json:"flavour"`
 }
+
+// ResidenceInput represents the residence input
+type ResidenceInput struct {
+	Name               string `gorm:"column:name"`
+	RegistrationNumber string `gorm:"column:registrationNumber"`
+	Location           string `gorm:"column:location"`
+	LivingRoomsCount   int    `gorm:"column:livingRoomsCount"`
+	Owner              string `gorm:"column:owner"`
+}

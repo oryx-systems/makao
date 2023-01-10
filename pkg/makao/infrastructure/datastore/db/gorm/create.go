@@ -9,6 +9,7 @@ type Create interface {
 	RegisterUser(ctx context.Context, user *User, contact *Contact, identifier *Identifier) error
 	SaveOTP(ctx context.Context, otp *OTP) error
 	SavePIN(ctx context.Context, pinData *UserPIN) (bool, error)
+	CreateResidence(ctx context.Context, payload Residence) (*Residence, error)
 }
 
 // RegisterUser creates a new user record.
@@ -60,4 +61,15 @@ func (db *PGInstance) SavePIN(ctx context.Context, pinData *UserPIN) (bool, erro
 	}
 
 	return true, nil
+}
+
+// CreateResidence creates a new residence
+func (db *PGInstance) CreateResidence(ctx context.Context, payload Residence) (*Residence, error) {
+	var residence *Residence
+
+	if err := db.DB.WithContext(ctx).Create(&payload).First(&residence).Error; err != nil {
+		return nil, err
+	}
+
+	return residence, nil
 }
