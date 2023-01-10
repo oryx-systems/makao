@@ -1,0 +1,3 @@
+extend type Mutation {
+  createResidence(input: ResidenceInput!): Residence!
+}

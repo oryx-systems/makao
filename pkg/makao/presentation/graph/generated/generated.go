@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+	"github.com/oryx-systems/makao/pkg/makao/application/dto"
 	"github.com/oryx-systems/makao/pkg/makao/application/enums"
 	"github.com/oryx-systems/makao/pkg/makao/domain"
 	gqlparser "github.com/vektah/gqlparser/v2"
@@ -47,7 +48,8 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		SendOtp func(childComplexity int, phoneNumber string, flavour enums.Flavour) int
+		CreateResidence func(childComplexity int, input dto.ResidenceInput) int
+		SendOtp         func(childComplexity int, phoneNumber string, flavour enums.Flavour) int
 	}
 
 	Query struct {
@@ -72,6 +74,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	SendOtp(ctx context.Context, phoneNumber string, flavour enums.Flavour) (string, error)
+	CreateResidence(ctx context.Context, input dto.ResidenceInput) (*domain.Residence, error)
 }
 type QueryResolver interface {
 	GetUserResidences(ctx context.Context) ([]*domain.Residence, error)
@@ -91,6 +94,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.createResidence":
+		if e.complexity.Mutation.CreateResidence == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createResidence_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateResidence(childComplexity, args["input"].(dto.ResidenceInput)), true
 
 	case "Mutation.sendOTP":
 		if e.complexity.Mutation.SendOtp == nil {
@@ -181,7 +196,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputResidenceInput,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -245,9 +262,18 @@ var sources = []*ast.Source{
   CONSUMER
   PRO
 }`, BuiltIn: false},
-	{Name: "../input.graphql", Input: ``, BuiltIn: false},
+	{Name: "../input.graphql", Input: `input ResidenceInput {
+    name: String!
+    registrationNumber: String!
+    location: String!
+    livingRoomsCount: Int!
+    owner: ID!
+}`, BuiltIn: false},
 	{Name: "../otp.graphql", Input: `extend type Mutation {
     sendOTP(phoneNumber: String!, flavour: Flavour!): String!
+}`, BuiltIn: false},
+	{Name: "../residence.graphql", Input: `extend type Mutation {
+  createResidence(input: ResidenceInput!): Residence!
 }`, BuiltIn: false},
 	{Name: "../types.graphql", Input: `type Residence {
     id: String!
@@ -288,6 +314,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createResidence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 dto.ResidenceInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNResidenceInput2githubᚗcomᚋoryxᚑsystemsᚋmakaoᚋpkgᚋmakaoᚋapplicationᚋdtoᚐResidenceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_sendOTP_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -415,6 +456,77 @@ func (ec *executionContext) fieldContext_Mutation_sendOTP(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_sendOTP_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createResidence(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createResidence(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateResidence(rctx, fc.Args["input"].(dto.ResidenceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*domain.Residence)
+	fc.Result = res
+	return ec.marshalNResidence2ᚖgithubᚗcomᚋoryxᚑsystemsᚋmakaoᚋpkgᚋmakaoᚋdomainᚐResidence(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createResidence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Residence_id(ctx, field)
+			case "active":
+				return ec.fieldContext_Residence_active(ctx, field)
+			case "name":
+				return ec.fieldContext_Residence_name(ctx, field)
+			case "registrationNumber":
+				return ec.fieldContext_Residence_registrationNumber(ctx, field)
+			case "location":
+				return ec.fieldContext_Residence_location(ctx, field)
+			case "livingRoomsCount":
+				return ec.fieldContext_Residence_livingRoomsCount(ctx, field)
+			case "owner":
+				return ec.fieldContext_Residence_owner(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Residence", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createResidence_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2780,6 +2892,66 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputResidenceInput(ctx context.Context, obj interface{}) (dto.ResidenceInput, error) {
+	var it dto.ResidenceInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "registrationNumber", "location", "livingRoomsCount", "owner"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "registrationNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("registrationNumber"))
+			it.RegistrationNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "location":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
+			it.Location, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "livingRoomsCount":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("livingRoomsCount"))
+			it.LivingRoomsCount, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "owner":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("owner"))
+			it.Owner, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2811,6 +2983,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_sendOTP(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createResidence":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createResidence(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -3353,6 +3534,21 @@ func (ec *executionContext) marshalNFlavour2githubᚗcomᚋoryxᚑsystemsᚋmaka
 	return v
 }
 
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3366,6 +3562,10 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNResidence2githubᚗcomᚋoryxᚑsystemsᚋmakaoᚋpkgᚋmakaoᚋdomainᚐResidence(ctx context.Context, sel ast.SelectionSet, v domain.Residence) graphql.Marshaler {
+	return ec._Residence(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNResidence2ᚕᚖgithubᚗcomᚋoryxᚑsystemsᚋmakaoᚋpkgᚋmakaoᚋdomainᚐResidenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*domain.Residence) graphql.Marshaler {
@@ -3420,6 +3620,11 @@ func (ec *executionContext) marshalNResidence2ᚖgithubᚗcomᚋoryxᚑsystems�
 		return graphql.Null
 	}
 	return ec._Residence(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNResidenceInput2githubᚗcomᚋoryxᚑsystemsᚋmakaoᚋpkgᚋmakaoᚋapplicationᚋdtoᚐResidenceInput(ctx context.Context, v interface{}) (dto.ResidenceInput, error) {
+	res, err := ec.unmarshalInputResidenceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

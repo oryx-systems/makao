@@ -3,6 +3,8 @@ package mock
 import (
 	"context"
 
+	"github.com/brianvoe/gofakeit"
+	"github.com/google/uuid"
 	"github.com/oryx-systems/makao/pkg/makao/application/enums"
 	"github.com/oryx-systems/makao/pkg/makao/domain"
 )
@@ -17,6 +19,7 @@ type DataStoreMock struct {
 	MockGetUserPINByUserIDFn          func(ctx context.Context, userID string, flavour enums.Flavour) (*domain.UserPIN, error)
 	MockGetUserResidencesByUserIDFn   func(ctx context.Context, userID string) ([]*domain.Residence, error)
 	MockInvalidatePINFn               func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error)
+	MockCreateResidenceFn             func(ctx context.Context, payload domain.Residence) (*domain.Residence, error)
 }
 
 // NewDataStoreMock returns a new instance of the mock datastore
@@ -45,6 +48,17 @@ func NewDataStoreMock() *DataStoreMock {
 		},
 		MockInvalidatePINFn: func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error) {
 			return true, nil
+		},
+		MockCreateResidenceFn: func(ctx context.Context, payload domain.Residence) (*domain.Residence, error) {
+			return &domain.Residence{
+				ID:                 uuid.New().String(),
+				Active:             true,
+				Name:               gofakeit.BeerName(),
+				RegistrationNumber: gofakeit.BeerName(),
+				Location:           gofakeit.Address().City,
+				LivingRoomsCount:   20,
+				Owner:              uuid.New().String(),
+			}, nil
 		},
 	}
 }
@@ -87,4 +101,9 @@ func (m *DataStoreMock) GetUserResidencesByUserID(ctx context.Context, userID st
 // InvalidatePIN mocks the InvalidatePIN method
 func (m *DataStoreMock) InvalidatePIN(ctx context.Context, userID string, flavour enums.Flavour) (bool, error) {
 	return m.MockInvalidatePINFn(ctx, userID, flavour)
+}
+
+// CreateResidence mocks the CreateResidence method
+func (m *DataStoreMock) CreateResidence(ctx context.Context, payload domain.Residence) (*domain.Residence, error) {
+	return m.MockCreateResidenceFn(ctx, payload)
 }

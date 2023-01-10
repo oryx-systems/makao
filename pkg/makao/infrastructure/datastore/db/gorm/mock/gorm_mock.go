@@ -21,6 +21,7 @@ type GormDatastoreMock struct {
 	MockGetUserResidencesByUserIDFn   func(ctx context.Context, userID string) ([]*gorm.UserResidence, error)
 	MockGetResidenceByIDFn            func(ctx context.Context, residenceID string) (*gorm.Residence, error)
 	MockInvalidatePINFn               func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error)
+	MockCreateResidenceFn             func(ctx context.Context, payload gorm.Residence) (*gorm.Residence, error)
 }
 
 // NewGormDatastoreMock initializes a new GormDatastoreMock
@@ -114,6 +115,9 @@ func NewGormDatastoreMock() *GormDatastoreMock {
 		MockInvalidatePINFn: func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error) {
 			return true, nil
 		},
+		MockCreateResidenceFn: func(ctx context.Context, payload gorm.Residence) (*gorm.Residence, error) {
+			return residence, nil
+		},
 	}
 }
 
@@ -160,4 +164,9 @@ func (m *GormDatastoreMock) GetUserResidencesByUserID(ctx context.Context, userI
 // InvalidatePIN mocks the InvalidatePIN method
 func (m *GormDatastoreMock) InvalidatePIN(ctx context.Context, userID string, flavour enums.Flavour) (bool, error) {
 	return m.MockInvalidatePINFn(ctx, userID, flavour)
+}
+
+// CreateResidence mocks the CreateResidence method
+func (m *GormDatastoreMock) CreateResidence(ctx context.Context, payload gorm.Residence) (*gorm.Residence, error) {
+	return m.MockCreateResidenceFn(ctx, payload)
 }
