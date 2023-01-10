@@ -8,18 +8,18 @@ import (
 
 type User struct {
 	ID              string          `json:"id"`
-	FirstName       string          `json:"first_name"`
-	MiddleName      string          `json:"middle_name"`
-	LastName        string          `json:"last_name"`
+	FirstName       string          `json:"firstName"`
+	MiddleName      string          `json:"middleName"`
+	LastName        string          `json:"lastName"`
 	Active          bool            `json:"active"`
 	Flavour         enums.Flavour   `json:"flavour"`
 	UserName        string          `json:"username"`
-	UserType        string          `json:"user_type"`
-	UserIdentifier  Identifier      `json:"user_identifier"`
-	UserContact     Contact         `json:"user_contact"`
-	DeviceToken     string          `json:"device_token"`
+	UserType        string          `json:"userType"`
+	UserIdentifier  Identifier      `json:"userIdentifier"`
+	UserContact     Contact         `json:"userContact"`
+	DeviceToken     string          `json:"deviceToken"`
 	Residence       string          `json:"residence"`
-	AuthCredentials AuthCredentials `json:"auth_credentials"`
+	AuthCredentials AuthCredentials `json:"authCredentials"`
 }
 
 type AuthCredentials struct {
@@ -51,9 +51,9 @@ type UserPIN struct {
 type Identifier struct {
 	ID              string               `json:"id"`
 	Active          bool                 `json:"active"`
-	IdentifierType  enums.IdentifierType `json:"identifier_type"`
-	IdentifierValue string               `json:"identifier_value"`
-	UserID          string               `json:"user_id"`
+	IdentifierType  enums.IdentifierType `json:"identifierType"`
+	IdentifierValue string               `json:"identifierValue"`
+	UserID          string               `json:"userID"`
 }
 
 type LoginResponse struct {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/oryx-systems/makao/pkg/makao/application/enums"
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm/clause"
 )
 
@@ -16,6 +15,7 @@ type Query interface {
 	GetUserPINByUserID(ctx context.Context, userID string, flavour enums.Flavour) (*UserPIN, error)
 	GetUserResidencesByUserID(ctx context.Context, userID string) ([]*UserResidence, error)
 	GetResidenceByID(ctx context.Context, residenceID string) (*Residence, error)
+	SearchUser(ctx context.Context, searchTerm string) ([]*User, error)
 }
 
 // GetUserProfileByUserID fetches a user profile using the user ID
@@ -31,7 +31,6 @@ func (db *PGInstance) GetUserProfileByUserID(ctx context.Context, userID *string
 func (db *PGInstance) GetUserProfileByPhoneNumber(ctx context.Context, phoneNumber string, flavour enums.Flavour) (*User, error) {
 	var user User
 
-	logrus.Println("phoneNumber: ", phoneNumber)
 	if err := db.DB.Joins("JOIN makao_contact on makao_user.id = makao_contact.user_id").Where("makao_contact.contact_value = ? AND makao_contact.flavour = ?", phoneNumber, flavour).Preload(clause.Associations).First(&user).Error; err != nil {
 		return nil, fmt.Errorf("failed to get user by phonenumber %v: %v", phoneNumber, err)
 	}
@@ -70,4 +69,19 @@ func (db *PGInstance) GetResidenceByID(ctx context.Context, residenceID string) 
 	}
 
 	return &residence, nil
+}
+
+// SearchUser searches for a user using the search term
+func (db *PGInstance) SearchUser(ctx context.Context, searchTerm string) ([]*User, error) {
+	var users []*User
+	if err := db.DB.Joins("JOIN makao_contact on makao_user.id = makao_contact.user_id").
+		Joins("JOIN makao_identifier on makao_user.id = makao_identifier.user_id").
+		Where("makao_contact.contact_value ILIKE ? OR makao_user.first_name ILIKE ? "+
+			"OR makao_user.last_name ILIKE ? OR makao_user.username ILIKE ? OR makao_identifier.identifier_value ILIKE ?", "%"+searchTerm+"%", "%"+searchTerm+"%", "%"+searchTerm+"%", "%"+searchTerm+"%", "%"+searchTerm+"%").
+		Where("makao_user.active = ?", true).
+		Preload(clause.Associations).Find(&users).Error; err != nil {
+		return nil, fmt.Errorf("failed to search user: %v", err)
+	}
+
+	return users, nil
 }

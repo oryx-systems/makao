@@ -137,3 +137,49 @@ func (d *DbServiceImpl) GetUserResidencesByUserID(ctx context.Context, userID st
 
 	return userResidences, nil
 }
+
+// SearchUser searches for users in the system using a search term
+func (d *DbServiceImpl) SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error) {
+	var users []*domain.User
+
+	records, err := d.query.SearchUser(ctx, searchTerm)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search user: %v", err)
+	}
+
+	for _, record := range records {
+		contact := &domain.Contact{
+			ID:           record.UserContact.ID,
+			Active:       record.UserContact.Active,
+			ContactType:  record.UserContact.ContactType,
+			ContactValue: record.UserContact.ContactValue,
+			Flavour:      record.UserContact.Flavour,
+			UserID:       *record.ID,
+		}
+
+		identifier := &domain.Identifier{
+			ID:              record.UserIdentifier.ID,
+			Active:          record.UserIdentifier.Active,
+			IdentifierType:  record.UserIdentifier.IdentifierType,
+			IdentifierValue: record.UserIdentifier.IdentifierValue,
+			UserID:          *record.ID,
+		}
+
+		users = append(users, &domain.User{
+			ID:             *record.ID,
+			UserIdentifier: *identifier,
+			UserContact:    *contact,
+			FirstName:      record.FirstName,
+			MiddleName:     record.MiddleName,
+			LastName:       record.LastName,
+			Active:         record.Active,
+			Flavour:        record.Flavour,
+			UserName:       record.UserName,
+			UserType:       record.UserType,
+			DeviceToken:    record.DeviceToken,
+			Residence:      record.Residence,
+		})
+	}
+
+	return users, nil
+}

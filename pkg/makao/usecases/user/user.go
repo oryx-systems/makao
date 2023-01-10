@@ -20,6 +20,7 @@ type UseCasesUser interface {
 	SetUserPIN(ctx context.Context, input *dto.UserPINInput) (bool, error)
 	GetUserResidences(ctx context.Context) ([]*domain.Residence, error)
 	SearchUserByPhoneNumber(ctx context.Context, phoneNumber string) (*domain.User, error)
+	SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error)
 }
 
 // UseCasesUserImpl represents the user usecase implementation
@@ -185,4 +186,9 @@ func (u UseCasesUserImpl) SearchUserByPhoneNumber(ctx context.Context, phoneNumb
 	}
 
 	return u.Query.GetUserProfileByPhoneNumber(ctx, *normalizedPhone, enums.FlavourConsumer)
+}
+
+// SearchUser searches for a user in the system using phone number, username
+func (u UseCasesUserImpl) SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error) {
+	return u.Query.SearchUser(ctx, searchTerm)
 }

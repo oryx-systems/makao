@@ -20,10 +20,30 @@ type DataStoreMock struct {
 	MockGetUserResidencesByUserIDFn   func(ctx context.Context, userID string) ([]*domain.Residence, error)
 	MockInvalidatePINFn               func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error)
 	MockCreateResidenceFn             func(ctx context.Context, payload domain.Residence) (*domain.Residence, error)
+	MockSearchUserFn                  func(ctx context.Context, searchTerm string) ([]*domain.User, error)
 }
 
 // NewDataStoreMock returns a new instance of the mock datastore
 func NewDataStoreMock() *DataStoreMock {
+	user := &domain.User{
+		ID:         uuid.New().String(),
+		FirstName:  gofakeit.FirstName(),
+		MiddleName: gofakeit.BeerAlcohol(),
+		LastName:   gofakeit.LastName(),
+		Active:     true,
+		Flavour:    enums.FlavourPro,
+		UserName:   gofakeit.Username(),
+		UserType:   "TENANT",
+		UserIdentifier: domain.Identifier{
+			ID: uuid.New().String(),
+		},
+		UserContact: domain.Contact{
+			ID: uuid.New().String(),
+		},
+		DeviceToken: uuid.New().String(),
+		Residence:   uuid.New().String(),
+	}
+
 	return &DataStoreMock{
 		MockRegisterUserFn: func(ctx context.Context, user *domain.User, contact *domain.Contact, identifier *domain.Identifier) error {
 			return nil
@@ -58,6 +78,11 @@ func NewDataStoreMock() *DataStoreMock {
 				Location:           gofakeit.Address().City,
 				LivingRoomsCount:   20,
 				Owner:              uuid.New().String(),
+			}, nil
+		},
+		MockSearchUserFn: func(ctx context.Context, searchTerm string) ([]*domain.User, error) {
+			return []*domain.User{
+				user,
 			}, nil
 		},
 	}
@@ -106,4 +131,9 @@ func (m *DataStoreMock) InvalidatePIN(ctx context.Context, userID string, flavou
 // CreateResidence mocks the CreateResidence method
 func (m *DataStoreMock) CreateResidence(ctx context.Context, payload domain.Residence) (*domain.Residence, error) {
 	return m.MockCreateResidenceFn(ctx, payload)
+}
+
+// SearchUser mocks the SearchUser method
+func (m *DataStoreMock) SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error) {
+	return m.MockSearchUserFn(ctx, searchTerm)
 }
