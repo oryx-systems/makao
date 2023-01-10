@@ -21,6 +21,7 @@ type Query interface {
 	GetUserProfileByPhoneNumber(ctx context.Context, phoneNumber string, flavour enums.Flavour) (*domain.User, error)
 	GetUserPINByUserID(ctx context.Context, userID string, flavour enums.Flavour) (*domain.UserPIN, error)
 	GetUserResidencesByUserID(ctx context.Context, userID string) ([]*domain.Residence, error)
+	SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error)
 }
 
 // Update is a collection of methods with the ability to update any data

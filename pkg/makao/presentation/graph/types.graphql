@@ -7,3 +7,33 @@ type Residence {
     livingRoomsCount: Int!
     owner: String!
 }
+
+type User {
+    id: String!
+    firstName: String!
+    middleName: String!
+    lastName: String!
+    active: Boolean!
+    flavour: Flavour!
+    username: String!
+    userType: String!
+    userIdentifier: Identifier!
+    userContact: Contact!
+}
+
+type Identifier {
+    id: String!
+    active: Boolean!
+    identifierType: IdentifierType!
+    identifierValue: String!
+    userID: String!
+}
+
+type Contact {
+    id: String!
+    active: Boolean!
+    contactType: String!
+    contactValue: String!
+    userID: String!
+    flavour: Flavour!
+}

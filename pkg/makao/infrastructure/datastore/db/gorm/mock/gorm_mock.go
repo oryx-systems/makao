@@ -22,6 +22,7 @@ type GormDatastoreMock struct {
 	MockGetResidenceByIDFn            func(ctx context.Context, residenceID string) (*gorm.Residence, error)
 	MockInvalidatePINFn               func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error)
 	MockCreateResidenceFn             func(ctx context.Context, payload gorm.Residence) (*gorm.Residence, error)
+	MockSearchUserFn                  func(ctx context.Context, searchTerm string) ([]*gorm.User, error)
 }
 
 // NewGormDatastoreMock initializes a new GormDatastoreMock
@@ -94,6 +95,9 @@ func NewGormDatastoreMock() *GormDatastoreMock {
 		},
 		MockGetUserProfileByPhoneNumberFn: func(ctx context.Context, phoneNumber string, flavour enums.Flavour) (*gorm.User, error) {
 			return user, nil
+		},
+		MockSearchUserFn: func(ctx context.Context, searchTerm string) ([]*gorm.User, error) {
+			return []*gorm.User{user}, nil
 		},
 		MockGetUserPINByUserIDFn: func(ctx context.Context, userID string, flavour enums.Flavour) (*gorm.UserPIN, error) {
 			return &gorm.UserPIN{
@@ -169,4 +173,9 @@ func (m *GormDatastoreMock) InvalidatePIN(ctx context.Context, userID string, fl
 // CreateResidence mocks the CreateResidence method
 func (m *GormDatastoreMock) CreateResidence(ctx context.Context, payload gorm.Residence) (*gorm.Residence, error) {
 	return m.MockCreateResidenceFn(ctx, payload)
+}
+
+// SearchUser mocks the SearchUser method
+func (m *GormDatastoreMock) SearchUser(ctx context.Context, searchTerm string) ([]*gorm.User, error) {
+	return m.MockSearchUserFn(ctx, searchTerm)
 }
