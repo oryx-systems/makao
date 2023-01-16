@@ -14,29 +14,11 @@ func (d *DbServiceImpl) InvalidatePIN(ctx context.Context, userID string, flavou
 	return d.update.InvalidatePIN(ctx, userID, flavour)
 }
 
-// CreateResidence creates a new residence
-func (d *DbServiceImpl) CreateResidence(ctx context.Context, payload domain.Residence) (*domain.Residence, error) {
-	data := &gorm.Residence{
-		Active:             payload.Active,
-		Name:               payload.Name,
-		RegistrationNumber: payload.RegistrationNumber,
-		Location:           payload.Location,
-		LivingRoomsCount:   payload.LivingRoomsCount,
-		Owner:              payload.Owner,
+// UpdateUser updates a user record
+func (d *DbServiceImpl) UpdateUser(ctx context.Context, user *domain.User, updateData map[string]interface{}) (bool, error) {
+	data := &gorm.User{
+		ID: &user.ID,
 	}
 
-	residence, err := d.create.CreateResidence(ctx, *data)
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain.Residence{
-		ID:                 residence.ID,
-		Active:             residence.Active,
-		Name:               residence.Name,
-		RegistrationNumber: residence.RegistrationNumber,
-		Location:           residence.Location,
-		LivingRoomsCount:   residence.LivingRoomsCount,
-		Owner:              residence.Owner,
-	}, nil
+	return d.update.UpdateUser(ctx, data, updateData)
 }

@@ -5,3 +5,12 @@ input ResidenceInput {
     livingRoomsCount: Int!
     owner: ID!
 }
+
+input HouseInput {
+    number: String!
+    category: String!
+    class: String!
+    rentValue: Float!
+    state: String!
+    residenceID: ID!
+}

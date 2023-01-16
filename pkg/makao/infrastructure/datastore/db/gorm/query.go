@@ -16,6 +16,8 @@ type Query interface {
 	GetUserResidencesByUserID(ctx context.Context, userID string) ([]*UserResidence, error)
 	GetResidenceByID(ctx context.Context, residenceID string) (*Residence, error)
 	SearchUser(ctx context.Context, searchTerm string) ([]*User, error)
+	GetHouseByNumber(ctx context.Context, houseNumber string) (*House, error)
+	ListHousesInResidence(ctx context.Context, residenceID string) ([]*House, error)
 }
 
 // GetUserProfileByUserID fetches a user profile using the user ID
@@ -84,4 +86,25 @@ func (db *PGInstance) SearchUser(ctx context.Context, searchTerm string) ([]*Use
 	}
 
 	return users, nil
+}
+
+// GetHouseByNumber fetches a house using the house number
+func (db *PGInstance) GetHouseByNumber(ctx context.Context, houseNumber string) (*House, error) {
+	var house House
+	if err := db.DB.Where(&House{Number: houseNumber}).First(&house).Error; err != nil {
+		return nil, fmt.Errorf("failed to get house: %v", err)
+	}
+
+	return &house, nil
+}
+
+// ListHousesInResidence lists all the houses in a residence
+func (db *PGInstance) ListHousesInResidence(ctx context.Context, residenceID string) ([]*House, error) {
+	var houses []*House
+
+	if err := db.DB.Where(&House{ResidenceID: residenceID}).Find(&houses).Error; err != nil {
+		return nil, fmt.Errorf("failed to get houses: %v", err)
+	}
+
+	return houses, nil
 }

@@ -7,19 +7,21 @@ import (
 )
 
 type User struct {
-	ID              string          `json:"id"`
-	FirstName       string          `json:"firstName"`
-	MiddleName      string          `json:"middleName"`
-	LastName        string          `json:"lastName"`
-	Active          bool            `json:"active"`
-	Flavour         enums.Flavour   `json:"flavour"`
-	UserName        string          `json:"username"`
-	UserType        string          `json:"userType"`
-	UserIdentifier  Identifier      `json:"userIdentifier"`
-	UserContact     Contact         `json:"userContact"`
-	DeviceToken     string          `json:"deviceToken"`
-	Residence       string          `json:"residence"`
-	AuthCredentials AuthCredentials `json:"authCredentials"`
+	ID               string          `json:"id"`
+	FirstName        string          `json:"firstName"`
+	MiddleName       string          `json:"middleName"`
+	LastName         string          `json:"lastName"`
+	Active           bool            `json:"active"`
+	Flavour          enums.Flavour   `json:"flavour"`
+	UserName         string          `json:"username"`
+	UserType         string          `json:"userType"`
+	UserIdentifier   Identifier      `json:"userIdentifier"`
+	UserContact      Contact         `json:"userContact"`
+	DeviceToken      string          `json:"deviceToken"`
+	Residence        string          `json:"residence"`
+	CurrentResidence string          `json:"currentResidence"`
+	CurrentHouse     string          `json:"currentHouse"`
+	AuthCredentials  AuthCredentials `json:"authCredentials"`
 }
 
 type AuthCredentials struct {

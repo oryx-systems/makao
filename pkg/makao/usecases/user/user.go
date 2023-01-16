@@ -8,6 +8,7 @@ import (
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
 	"github.com/oryx-systems/makao/pkg/makao/application/dto"
 	"github.com/oryx-systems/makao/pkg/makao/application/enums"
+	"github.com/oryx-systems/makao/pkg/makao/application/extension"
 	"github.com/oryx-systems/makao/pkg/makao/application/utils"
 	"github.com/oryx-systems/makao/pkg/makao/domain"
 	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore"
@@ -21,13 +22,16 @@ type UseCasesUser interface {
 	GetUserResidences(ctx context.Context) ([]*domain.Residence, error)
 	SearchUserByPhoneNumber(ctx context.Context, phoneNumber string) (*domain.User, error)
 	SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error)
+	ProceedWithResidence(ctx context.Context, residenceID string) (bool, error)
+	AssignHouseToAUser(ctx context.Context, userID string, houseNumber string) (bool, error)
 }
 
 // UseCasesUserImpl represents the user usecase implementation
 type UseCasesUserImpl struct {
-	Create datastore.Create
-	Query  datastore.Query
-	Update datastore.Update
+	Create    datastore.Create
+	Query     datastore.Query
+	Update    datastore.Update
+	Extension extension.Extension
 }
 
 // NewUseCasesUser initializes the new user implementation
@@ -35,11 +39,13 @@ func NewUseCasesUser(
 	create datastore.Create,
 	query datastore.Query,
 	update datastore.Update,
+	extension extension.Extension,
 ) UseCasesUser {
 	return &UseCasesUserImpl{
-		Create: create,
-		Query:  query,
-		Update: update,
+		Create:    create,
+		Query:     query,
+		Update:    update,
+		Extension: extension,
 	}
 }
 
@@ -191,4 +197,40 @@ func (u UseCasesUserImpl) SearchUserByPhoneNumber(ctx context.Context, phoneNumb
 // SearchUser searches for a user in the system using phone number, username
 func (u UseCasesUserImpl) SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error) {
 	return u.Query.SearchUser(ctx, searchTerm)
+}
+
+// UpdateUser updates a user profile
+func (u UseCasesUserImpl) ProceedWithResidence(ctx context.Context, residenceID string) (bool, error) {
+	uid, err := u.Extension.GetLoggedInUserUID(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	userPayload := &domain.User{
+		ID: uid,
+	}
+
+	updateData := map[string]interface{}{
+		"current_residence": residenceID,
+	}
+
+	return u.Update.UpdateUser(ctx, userPayload, updateData)
+}
+
+// AssignHouseToAUser assigns a house to a user
+func (u UseCasesUserImpl) AssignHouseToAUser(ctx context.Context, userID string, houseNumber string) (bool, error) {
+	user, err := u.Query.GetUserProfileByUserID(ctx, userID)
+	if err != nil {
+		return false, err
+	}
+
+	userPayload := &domain.User{
+		ID: user.ID,
+	}
+
+	updateData := map[string]interface{}{
+		"current_house": houseNumber,
+	}
+
+	return u.Update.UpdateUser(ctx, userPayload, updateData)
 }

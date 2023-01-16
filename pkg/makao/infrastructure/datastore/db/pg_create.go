@@ -74,3 +74,50 @@ func (d *DbServiceImpl) SavePIN(ctx context.Context, pinInput *domain.UserPIN) (
 
 	return true, nil
 }
+
+// CreateHouse is used to create a house record in the database
+func (d *DbServiceImpl) CreateHouse(ctx context.Context, house *domain.House) (bool, error) {
+	h := &gorm.House{
+		Active:      house.Active,
+		Number:      house.Number,
+		Category:    house.Category,
+		Class:       house.Class,
+		RentValue:   house.RentValue,
+		State:       house.State,
+		ResidenceID: house.ResidenceID,
+	}
+
+	err := d.create.CreateHouse(ctx, h)
+	if err != nil {
+		return false, fmt.Errorf("failed to create house: %v", err)
+	}
+
+	return true, nil
+}
+
+// CreateResidence creates a new residence
+func (d *DbServiceImpl) CreateResidence(ctx context.Context, payload domain.Residence) (*domain.Residence, error) {
+	data := &gorm.Residence{
+		Active:             payload.Active,
+		Name:               payload.Name,
+		RegistrationNumber: payload.RegistrationNumber,
+		Location:           payload.Location,
+		LivingRoomsCount:   payload.LivingRoomsCount,
+		Owner:              payload.Owner,
+	}
+
+	residence, err := d.create.CreateResidence(ctx, *data)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.Residence{
+		ID:                 residence.ID,
+		Active:             residence.Active,
+		Name:               residence.Name,
+		RegistrationNumber: residence.RegistrationNumber,
+		Location:           residence.Location,
+		LivingRoomsCount:   residence.LivingRoomsCount,
+		Owner:              residence.Owner,
+	}, nil
+}

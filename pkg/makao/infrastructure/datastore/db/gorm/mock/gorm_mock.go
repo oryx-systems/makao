@@ -23,6 +23,10 @@ type GormDatastoreMock struct {
 	MockInvalidatePINFn               func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error)
 	MockCreateResidenceFn             func(ctx context.Context, payload gorm.Residence) (*gorm.Residence, error)
 	MockSearchUserFn                  func(ctx context.Context, searchTerm string) ([]*gorm.User, error)
+	MockCreateHouseFn                 func(ctx context.Context, house *gorm.House) error
+	MockGetHouseByNumberFn            func(ctx context.Context, houseNumber string) (*gorm.House, error)
+	MockUpdateUserFn                  func(ctx context.Context, user *gorm.User, updateData map[string]interface{}) (bool, error)
+	MockListHousesInResidenceFn       func(ctx context.Context, residenceID string) ([]*gorm.House, error)
 }
 
 // NewGormDatastoreMock initializes a new GormDatastoreMock
@@ -119,8 +123,36 @@ func NewGormDatastoreMock() *GormDatastoreMock {
 		MockInvalidatePINFn: func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error) {
 			return true, nil
 		},
+		MockCreateHouseFn: func(ctx context.Context, house *gorm.House) error {
+			return nil
+		},
 		MockCreateResidenceFn: func(ctx context.Context, payload gorm.Residence) (*gorm.Residence, error) {
 			return residence, nil
+		},
+		MockGetHouseByNumberFn: func(ctx context.Context, houseNumber string) (*gorm.House, error) {
+			return &gorm.House{
+				ID:        uuid.New().String(),
+				Active:    true,
+				Number:    houseNumber,
+				Category:  "BEDSITTER",
+				Class:     "CLASS_A",
+				RentValue: 10,
+			}, nil
+		},
+		MockUpdateUserFn: func(ctx context.Context, user *gorm.User, updateData map[string]interface{}) (bool, error) {
+			return true, nil
+		},
+		MockListHousesInResidenceFn: func(ctx context.Context, residenceID string) ([]*gorm.House, error) {
+			return []*gorm.House{
+				{
+					ID:        uuid.New().String(),
+					Active:    true,
+					Number:    "1",
+					Category:  "BEDSITTER",
+					Class:     "CLASS_A",
+					RentValue: 10,
+				},
+			}, nil
 		},
 	}
 }
@@ -178,4 +210,24 @@ func (m *GormDatastoreMock) CreateResidence(ctx context.Context, payload gorm.Re
 // SearchUser mocks the SearchUser method
 func (m *GormDatastoreMock) SearchUser(ctx context.Context, searchTerm string) ([]*gorm.User, error) {
 	return m.MockSearchUserFn(ctx, searchTerm)
+}
+
+// CreateHouse mocks the action of creating a house
+func (m *GormDatastoreMock) CreateHouse(ctx context.Context, house *gorm.House) error {
+	return m.MockCreateHouseFn(ctx, house)
+}
+
+// GetHouseByNumber mocks the action of getting a house by number
+func (m *GormDatastoreMock) GetHouseByNumber(ctx context.Context, houseNumber string) (*gorm.House, error) {
+	return m.MockGetHouseByNumberFn(ctx, houseNumber)
+}
+
+// UpdateUser mocks the action of updating a user
+func (m *GormDatastoreMock) UpdateUser(ctx context.Context, user *gorm.User, updateData map[string]interface{}) (bool, error) {
+	return m.MockUpdateUserFn(ctx, user, updateData)
+}
+
+// ListHousesInResidence mocks the action of listing houses in a residence
+func (m *GormDatastoreMock) ListHousesInResidence(ctx context.Context, residenceID string) ([]*gorm.House, error) {
+	return m.MockListHousesInResidenceFn(ctx, residenceID)
 }

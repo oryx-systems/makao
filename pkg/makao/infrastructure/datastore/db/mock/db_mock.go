@@ -21,6 +21,8 @@ type DataStoreMock struct {
 	MockInvalidatePINFn               func(ctx context.Context, userID string, flavour enums.Flavour) (bool, error)
 	MockCreateResidenceFn             func(ctx context.Context, payload domain.Residence) (*domain.Residence, error)
 	MockSearchUserFn                  func(ctx context.Context, searchTerm string) ([]*domain.User, error)
+	MockUpdateUserFn                  func(ctx context.Context, user *domain.User, updateData map[string]interface{}) (bool, error)
+	MockListHousesInResidenceFn       func(ctx context.Context, residenceID string) ([]*domain.House, error)
 }
 
 // NewDataStoreMock returns a new instance of the mock datastore
@@ -85,6 +87,23 @@ func NewDataStoreMock() *DataStoreMock {
 				user,
 			}, nil
 		},
+		MockUpdateUserFn: func(ctx context.Context, user *domain.User, updateData map[string]interface{}) (bool, error) {
+			return true, nil
+		},
+		MockListHousesInResidenceFn: func(ctx context.Context, residenceID string) ([]*domain.House, error) {
+			return []*domain.House{
+				{
+					ID:          uuid.New().String(),
+					Active:      true,
+					Number:      "A2",
+					Category:    "BEDSITTER",
+					Class:       "A",
+					RentValue:   2000,
+					State:       "OCCUPIED",
+					ResidenceID: uuid.New().String(),
+				},
+			}, nil
+		},
 	}
 }
 
@@ -136,4 +155,14 @@ func (m *DataStoreMock) CreateResidence(ctx context.Context, payload domain.Resi
 // SearchUser mocks the SearchUser method
 func (m *DataStoreMock) SearchUser(ctx context.Context, searchTerm string) ([]*domain.User, error) {
 	return m.MockSearchUserFn(ctx, searchTerm)
+}
+
+// UpdateUser mocks the UpdateUser method
+func (m *DataStoreMock) UpdateUser(ctx context.Context, user *domain.User, updateData map[string]interface{}) (bool, error) {
+	return m.MockUpdateUserFn(ctx, user, updateData)
+}
+
+// ListHousesInResidence mocks the ListHousesInResidence method
+func (m *DataStoreMock) ListHousesInResidence(ctx context.Context, residenceID string) ([]*domain.House, error) {
+	return m.MockListHousesInResidenceFn(ctx, residenceID)
 }

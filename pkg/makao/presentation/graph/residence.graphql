@@ -1,3 +1,16 @@
 extend type Mutation {
   createResidence(input: ResidenceInput!): Residence!
+  addUserToResidence(userID: ID!): Boolean!
+  updateResidence(
+    id: ID!
+    name: String
+    livingRoomsCount: Int
+    owner: ID
+  ): Boolean!
+  freezeResidence(residenceID: ID!): Boolean!
+  unfreezeResidence(residenceID: ID!): Boolean!
+}
+
+extend type Query {
+  listResidenceTenants: [User!]
 }
