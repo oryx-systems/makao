@@ -1,0 +1,9 @@
+extend type Mutation {
+    createHouse(input: HouseInput!): Boolean!
+}
+
+extend type Query {
+    getHouseByHouseNumber(houseNumber: String!): House!
+    getUserHouses(userID: ID!): [House!]
+    listHousesInResidence(residenceID: ID!): [House!]
+}

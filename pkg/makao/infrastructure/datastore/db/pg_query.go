@@ -183,3 +183,46 @@ func (d *DbServiceImpl) SearchUser(ctx context.Context, searchTerm string) ([]*d
 
 	return users, nil
 }
+
+// GetHouseByNumber returns a house by its number
+func (d *DbServiceImpl) GetHouseByNumber(ctx context.Context, houseNumber string) (*domain.House, error) {
+	house, err := d.query.GetHouseByNumber(ctx, houseNumber)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get house by number: %v", err)
+	}
+
+	return &domain.House{
+		ID:          house.ID,
+		Active:      house.Active,
+		Number:      house.Number,
+		Category:    house.Category,
+		Class:       house.Class,
+		RentValue:   house.RentValue,
+		State:       house.State,
+		ResidenceID: house.ResidenceID,
+	}, nil
+}
+
+// ListHousesInResidence returns a list of houses in a residence
+func (d *DbServiceImpl) ListHousesInResidence(ctx context.Context, residenceID string) ([]*domain.House, error) {
+	records, err := d.query.ListHousesInResidence(ctx, residenceID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list houses in residence: %v", err)
+	}
+
+	var houses []*domain.House
+	for _, record := range records {
+		houses = append(houses, &domain.House{
+			ID:          record.ID,
+			Active:      record.Active,
+			Number:      record.Number,
+			Category:    record.Category,
+			Class:       record.Class,
+			RentValue:   record.RentValue,
+			State:       record.State,
+			ResidenceID: record.ResidenceID,
+		})
+	}
+
+	return houses, nil
+}

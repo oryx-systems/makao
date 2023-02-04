@@ -26,18 +26,20 @@ type Base struct {
 type User struct {
 	Base
 
-	ID             *string       `gorm:"column:id"`
-	FirstName      string        `gorm:"column:first_name"`
-	MiddleName     string        `gorm:"column:middle_name"`
-	LastName       string        `gorm:"column:last_name"`
-	Active         bool          `gorm:"column:active"`
-	Flavour        enums.Flavour `gorm:"column:flavour"`
-	UserName       string        `gorm:"column:username"`
-	UserType       string        `gorm:"column:user_type"`
-	DeviceToken    string        `gorm:"column:device_token"`
-	Residence      string        `gorm:"column:residence"`
-	UserContact    Contact       `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;not null"`
-	UserIdentifier Identifier    `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;not null"`
+	ID               *string       `gorm:"column:id"`
+	FirstName        string        `gorm:"column:first_name"`
+	MiddleName       string        `gorm:"column:middle_name"`
+	LastName         string        `gorm:"column:last_name"`
+	Active           bool          `gorm:"column:active"`
+	Flavour          enums.Flavour `gorm:"column:flavour"`
+	UserName         string        `gorm:"column:username"`
+	UserType         string        `gorm:"column:user_type"`
+	DeviceToken      string        `gorm:"column:device_token"`
+	Residence        string        `gorm:"column:residence"`
+	UserContact      Contact       `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;not null"`
+	UserIdentifier   Identifier    `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;not null"`
+	CurrentResidence *string       `gorm:"column:current_residence"`
+	CurrentHouse     *string       `gorm:"column:current_house"`
 }
 
 // BeforeCreate is a hook run before creating a user
@@ -212,10 +214,12 @@ type House struct {
 
 	ID          string  `gorm:"column:id;primary_key"`
 	Active      bool    `gorm:"column:active"`
-	HouseNumber string  `gorm:"column:house_number"`
+	Number      string  `gorm:"column:number"`
 	Category    string  `gorm:"column:category"`
 	Class       string  `gorm:"column:class"` // applicable where houses maybe charged differently due to size
 	RentValue   float64 `gorm:"column:rent_value"`
+	State       string  `gorm:"column:state"`
+	ResidenceID string  `gorm:"column:residence_id"`
 }
 
 // BeforeCreate is a hook run before creating a house

@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
+	"github.com/oryx-systems/makao/pkg/makao/application/utils"
 )
 
 // Extension holds the methods that are used by the extension
@@ -68,9 +68,10 @@ func (e ExtImpl) MakeRequest(ctx context.Context, method string, path string, bo
 
 // GetLoggedInUserUID returns the UID of the logged in user
 func (e ExtImpl) GetLoggedInUserUID(ctx context.Context) (string, error) {
-	authToken, err := helpers.GetUserTokenFromContext(ctx)
+	uid, err := utils.GetLoggedInUser(ctx)
 	if err != nil {
-		return "", fmt.Errorf("auth token not found in context: %w", err)
+		return "", err
 	}
-	return authToken, nil
+
+	return uid, nil
 }

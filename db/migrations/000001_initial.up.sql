@@ -14,7 +14,9 @@ CREATE TABLE "makao_user" (
   "username" varchar(20) UNIQUE NOT NULL,
   "user_type" varchar(20),
   "device_token" text,
-  "residence" uuid
+  "residence" uuid,
+  "current_residence" uuid,
+	"current_house" uuid
 );
 
 CREATE TABLE "makao_contact" (
@@ -93,10 +95,12 @@ CREATE TABLE "makao_house" (
   "updated_at" timestamp,
   "updated_by" uuid,
   "active" boolean,
-  "house_number" varchar(20) UNIQUE NOT NULL,
-  "house_category" varchar(20) NOT NULL,
-  "house_class" varchar(20),
-  "rent_value" float NOT NULL
+  "number" varchar(20) UNIQUE NOT NULL,
+  "category" varchar(20) NOT NULL,
+  "class" varchar(20),
+  "rent_value" float NOT NULL,
+  "state" varchar(20) NOT NULL,
+  "residence_id" uuid
 );
 
 CREATE TABLE "makao_house_client" (
@@ -141,6 +145,8 @@ ALTER TABLE "makao_user_otp" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user"
 ALTER TABLE "makao_residence" ADD FOREIGN KEY ("owner") REFERENCES "makao_user" ("id");
 
 ALTER TABLE "makao_identifier" ADD FOREIGN KEY ("user_id") REFERENCES "makao_user" ("id");
+
+ALTER TABLE "makao_house" ADD FOREIGN KEY ("residence_id") REFERENCES "makao_residence" ("id");
 
 ALTER TABLE "makao_house_client" ADD FOREIGN KEY ("house_id") REFERENCES "makao_house" ("id");
 

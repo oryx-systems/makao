@@ -1,3 +1,9 @@
+extend type Mutation {
+  proceedWithResidence(residenceID: ID!): Boolean!
+  assignHouseToAUser(userID: ID!, houseNumber: String!): Boolean!
+  freezeUser(userID: ID!): Boolean!
+  unfreezeUser(userID: ID!): Boolean!
+}
 
 extend type Query {
   getUserResidences: [Residence!]!

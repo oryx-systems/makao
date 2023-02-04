@@ -37,3 +37,13 @@ type Contact {
     userID: String!
     flavour: Flavour!
 }
+
+type House {
+    id: String!
+    active: Boolean!
+    number: String!
+    category: String!
+    class: String!
+    rentValue: Float!
+    residenceID: String!
+}

@@ -13,12 +13,14 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/oryx-systems/makao/pkg/makao/application/common/helpers"
+	"github.com/oryx-systems/makao/pkg/makao/application/extension"
 	pgDB "github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore/db"
 	"github.com/oryx-systems/makao/pkg/makao/infrastructure/datastore/db/gorm"
 	"github.com/oryx-systems/makao/pkg/makao/presentation/graph"
 	"github.com/oryx-systems/makao/pkg/makao/presentation/graph/generated"
 	"github.com/oryx-systems/makao/pkg/makao/presentation/rest"
 	"github.com/oryx-systems/makao/pkg/makao/usecases"
+	"github.com/oryx-systems/makao/pkg/makao/usecases/house"
 	"github.com/oryx-systems/makao/pkg/makao/usecases/otp"
 	"github.com/oryx-systems/makao/pkg/makao/usecases/residence"
 	"github.com/oryx-systems/makao/pkg/makao/usecases/user"
@@ -122,12 +124,14 @@ func StartGinRouter(ctx context.Context) (*gin.Engine, error) {
 	}
 
 	db := pgDB.NewDBService(pg, pg, pg)
+	ext := extension.NewExtension()
 
-	userUsecase := user.NewUseCasesUser(db, db, db)
+	userUsecase := user.NewUseCasesUser(db, db, db, ext)
 	otpUsecase := otp.NewUseCaseOTP(db, db)
 	residenceUsecase := residence.NewResidence(db)
+	houseUsecase := house.NewUsecaseHouse(db, db)
 
-	usecases := usecases.NewMakaoUsecase(userUsecase, otpUsecase, residenceUsecase)
+	usecases := usecases.NewMakaoUsecase(userUsecase, otpUsecase, residenceUsecase, houseUsecase)
 	h := rest.NewPresentationHandlers(*usecases)
 
 	api := r.Group("/v1/api")

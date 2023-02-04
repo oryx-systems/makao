@@ -35,9 +35,19 @@ type UserPINInput struct {
 
 // ResidenceInput represents the residence input
 type ResidenceInput struct {
-	Name               string `gorm:"column:name"`
-	RegistrationNumber string `gorm:"column:registrationNumber"`
-	Location           string `gorm:"column:location"`
-	LivingRoomsCount   int    `gorm:"column:livingRoomsCount"`
-	Owner              string `gorm:"column:owner"`
+	Name               string `json:"name"`
+	RegistrationNumber string `json:"registrationNumber"`
+	Location           string `json:"location"`
+	LivingRoomsCount   int    `json:"livingRoomsCount"`
+	Owner              string `json:"owner"`
+}
+
+// HouseInput represents the house input
+type HouseInput struct {
+	Number      string  `json:"number"`
+	Category    string  `json:"category"`
+	Class       string  `json:"class"` // applicable where houses maybe charged differently due to size
+	RentValue   float64 `json:"rentValue"`
+	State       string  `json:"state"`
+	ResidenceID string  `json:"residenceID"`
 }
