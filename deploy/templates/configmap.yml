@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: config-{{ .Release.Name }}
+ namespace: {{ .Release.Namespace }}
+data:
+  GOOGLE_APPLICATION_CREDENTIALS: {{.Values.app.container.env.googleApplicationCredentials | quote}}
+  GOOGLE_CLOUD_PROJECT_ID: {{.Values.app.container.env.googleCloudProjectID | quote}}
+  GCR_NAME: {{.Values.app.container.env.gcrName | quote}}
+  DATABASE_REGION: {{.Values.app.container.env.db.databaseRegion | quote}}
+  DATABASE_INSTANCE: {{.Values.app.container.env.db.databaseInstance | quote}}
+  POSTGRES_USER: {{.Values.app.container.env.db.postgresUser | quote}}
+  POSTGRES_PASSWORD: {{.Values.app.container.env.db.postgresPassword | quote}}
+  POSTGRES_HOST: {{.Values.app.container.env.db.postgressHost | quote}}
+  POSTGRES_PORT: {{.Values.app.container.env.db.postgressPort | quote}}
+  POSTGRES_DB: {{.Values.app.container.env.db.postgresDB | quote}}
+  SERVICE_NAME: {{.Values.app.container.env.serviceName | quote}}
+  ROOT_COLLECTION_SUFFIX: {{.Values.app.container.env.db.rootCollectionSuffix | quote}}
+  DEBUG: {{.Values.app.container.env.debug | quote}}
+  REPOSITORY: {{.Values.app.container.env.db.repository | quote}}
+  AIT_API_KEY: {{.Values.app.container.env.aitAPIKey | quote}}
+  AIT_USERNAME: {{.Values.app.container.env.aitUserName | quote}}
+  AIT_SENDER_ID: {{.Values.app.container.env.aitSenderID | quote}}
+  AIT_ENVIRONMENT: {{.Values.app.container.env.aitEnvironment | quote}}
+  GOOGLE_PROJECT_NUMBER: {{.Values.app.container.env.googleProjectNumber | quote}}
+  FIREBASE_WEB_API_KEY: {{.Values.app.container.env.firebaseWebAPIKey | quote}}
+  ORYX_PROVIDER_CHANNEL: {{.Values.app.container.env.oryxProviderChannel | quote}}
+  JWT_SECRET: {{.Values.app.container.env.jwtSecret | quote}}
+  PORT: {{.Values.app.container.env.port | quote}}
+  GKE_CLUSTER: {{.Values.app.container.env.gkeCluster | quote}}
+  GKE_ZONE: {{.Values.app.container.env.gkeZone | quote}}
+  DOCKER_IMAGE: {{.Values.app.container.env.dockerImage | quote}}
+  REPLICAS_COUNT: {{.Values.app.container.env.replicaCount}}
