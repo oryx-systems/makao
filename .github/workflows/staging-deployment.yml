@@ -1,0 +1,168 @@
+name: Build and Deploy
+
+on: [push]
+
+env:
+  GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+  GOOGLE_CLOUD_PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+  GCR_NAME: ${{ secrets.GCR_NAME }}
+  DATABASE_REGION: ${{ secrets.DATABASE_REGION }}
+  DATABASE_INSTANCE: ${{ secrets.DATABASE_INSTANCE }}
+  POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+  POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+  POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+  SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+  ROOT_COLLECTION_SUFFIX: ${{ secrets.ROOT_COLLECTION_SUFFIX }}
+  DEBUG: ${{ secrets.DEBUG }}
+  REPOSITORY: ${{ secrets.REPOSITORY }}
+  AIT_API_KEY: ${{ secrets.AIT_API_KEY }}
+  AIT_USERNAME: ${{ secrets.AIT_USERNAME }}
+  AIT_SENDER_ID: ${{ secrets.AIT_SENDER_ID }}
+  AIT_ENVIRONMENT: ${{ secrets.AIT_ENVIRONMENT }}
+  GOOGLE_PROJECT_NUMBER: ${{ secrets.GOOGLE_PROJECT_NUMBER }}
+  FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY }}
+  ORYX_PROVIDER_CHANNEL: ${{ secrets.ORYX_PROVIDER_CHANNEL }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  PORT: ${{ secrets.PORT }}
+  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+  GKE_ZONE: ${{ secrets.GKE_ZONE }}
+  REPLICA_COUNT: ${{ secrets.REPLICA_COUNT }}
+  DEPLOY_RELEASE_NAME: ${{ secrets.DEPLOY_RELEASE_NAME }}
+  DEPLOY_NAMESPACE: ${{ secrets.DEPLOY_NAMESPACE }}
+  DOCKER_IMAGE: eu.gcr.io/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/${{ secrets.GCR_NAME }}:${{  github.sha }}
+  DATABASE_INSTANCE_CONNECTION_NAME: ${{ secrets.DATABASE_INSTANCE_CONNECTION_NAME }}
+  DEFAULT_RESIDENCE_ID: ${{secrets.DEFAULT_RESIDENCE_ID}}
+  CREDENTIALS_FILE: ${{secrets.CREDENTIALS_FILE}}
+
+jobs:
+  # deploy_to_staging:
+  #   name: Deploy staging server to Google Cloud Run
+  #   if: ${{ github.ref == 'refs/heads/feature'}}
+  #   strategy:
+  #     matrix:
+  #       go-version: [1.21.x]
+  #       environment: [staging]
+  
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: ${{ matrix.environment }}
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - id: 'auth'
+  #       uses: 'google-github-actions/auth@v0'
+  #       with:
+  #         credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+  #   # Configure Docker to use the gcloud command-line tool as a credential
+  #   # helper for authentication
+  #     - run: |-
+  #         gcloud --quiet auth configure-docker
+
+  #     - name: Build and Push Image to Google Container Registry
+  #       run: |-
+  #         docker build -t eu.gcr.io/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/${{ secrets.GCR_NAME }}:$GITHUB_SHA .
+  #         docker push eu.gcr.io/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/${{ secrets.GCR_NAME }}:$GITHUB_SHA
+
+  #     - name: Install Go
+  #       uses: actions/setup-go@v3
+  #       with:
+  #         go-version: ${{ matrix.go-version }}
+  
+  #     - name: Install migrate cli
+  #       run: |
+  #         go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.15.2
+  
+  #     - name: Install cloudsql proxy
+  #       uses: mattes/gce-cloudsql-proxy-action@v1
+  #       with:
+  #         creds: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+  #         instance: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}:${{ secrets.DATABASE_REGION }}:${{ secrets.DATABASE_INSTANCE }}
+  
+  #     - name: Run migrations
+  #       env:
+  #         POSTGRES_HOST: 127.0.0.1
+  #         POSTGRES_PORT: 5432
+  #       run: |
+  #         export POSTGRESQL_URL="postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@$POSTGRES_HOST:$POSTGRES_PORT/${{ secrets.POSTGRES_DB }}?sslmode=disable"
+  #         migrate -database ${POSTGRESQL_URL} -path db/migrations up
+
+  #     - name: Deploy to Google Cloud Run
+  #       uses: 'google-github-actions/deploy-cloudrun@v0'
+  #       with:
+  #         service: ${{ secrets.SERVICE_NAME }}
+  #         region: 'europe-west2'
+  #         image: 'eu.gcr.io/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/${{ secrets.GCR_NAME }}:${{  github.sha }}'
+
+  deploy_to_staging_k8:
+    name: Deploy staging server to google GKE
+    if: ${{ github.ref == 'refs/heads/feature'}}
+    strategy:
+      matrix:
+        environment: [staging]
+
+    runs-on: ubuntu-latest
+    environment:
+        name: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v0"
+        with:
+            credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+            project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+
+        # Configure Docker to use the gcloud command-line tool as a credential
+        # helper for authentication
+      - run: |-
+          gcloud --quiet auth configure-docker
+
+      - name: Build and Push Image to Google Container Registry
+        run: |-
+          docker build -t eu.gcr.io/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/${{ secrets.GCR_NAME }}:$GITHUB_SHA .
+          docker push eu.gcr.io/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/${{ secrets.GCR_NAME }}:$GITHUB_SHA
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install migrate cli
+        run: |
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.16.2
+
+      - name: Install cloudsql proxy
+        uses: mattes/gce-cloudsql-proxy-action@v1
+        with:
+          creds: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          instance: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}:${{ secrets.DATABASE_REGION }}:${{ secrets.DATABASE_INSTANCE }}
+
+      - name: Run migrations
+        env:
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+        run: |
+          export POSTGRESQL_URL="postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@$POSTGRES_HOST:$POSTGRES_PORT/${{ secrets.POSTGRES_DB }}?sslmode=disable"
+          migrate -database ${POSTGRESQL_URL} -path db/migrations up
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+      - name: Get the GKE credentials so we can deploy to the cluster
+        uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+          credentials: ${{ secrets.CREDENTIALS_FILE }}
+
+      - name: Deploy to Google Kubernetes engine
+        shell: bash
+        run: cd deploy/ && cat deploy.sh && sh deploy.sh
