@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "deploy.fullname" . }}
+  labels:
+    {{- include "deploy.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.app.container.env.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "deploy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "deploy.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "deploy.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      
+      volumes:
+        - name: {{.Values.app.container.env.googleApplicationCredentialsSecret.name}}
+          secret:
+            secretName: {{.Values.app.container.env.googleApplicationCredentialsSecret.name}}
+      
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ .Values.app.container.env.dockerImage }}
+          imagePullPolicy: {{ .Values.app.container.imagePullPolicy }}
+          ports:
+          - containerPort: {{.Values.app.container.env.port }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: config-{{ .Release.Name }}
+
+        - name: cloudsql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.7.2
+          args:
+            - "--structured-logs"
+            - "--port=5431"
+            - "{{ .Values.app.container.env.db.databaseInstanceConnectionName }}"
+            - "--credentials-file={{ .Values.app.container.env.googleApplicationCredentialsSecret.filePath }}"
+          securityContext:
+            runAsNonRoot: true
+
+          volumeMounts:
+          - name: {{.Values.app.container.env.googleApplicationCredentialsSecret.name}}
+            mountPath: {{.Values.app.container.env.googleApplicationCredentialsSecret.mountPath}}
+            readOnly: true
