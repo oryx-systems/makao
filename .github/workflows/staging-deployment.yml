@@ -35,6 +35,7 @@ env:
   DATABASE_INSTANCE_CONNECTION_NAME: ${{ secrets.DATABASE_INSTANCE_CONNECTION_NAME }}
   DEFAULT_RESIDENCE_ID: ${{secrets.DEFAULT_RESIDENCE_ID}}
   DOMAIN_HOST: ${{secrets.DOMAIN_HOST}}
+  ADMIN_EMAIL: ${{secrets.ADMIN_EMAIL}}
 
 jobs:
   # deploy_to_staging:
@@ -100,7 +101,7 @@ jobs:
 
   deploy_to_staging_k8:
     name: Deploy staging server to google GKE
-    if: ${{ github.ref == 'refs/heads/feature'}}
+    if: ${{ github.ref == 'refs/heads/set-up-reverse-proxy-and-tls'}}
     strategy:
       matrix:
         environment: [staging]

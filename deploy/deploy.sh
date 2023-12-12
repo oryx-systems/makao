@@ -49,8 +49,22 @@ helm upgrade \
     --set app.container.env.port="${PORT}" \
     --set app.container.env.defaultResidenceId="${DEFAULT_RESIDENCE_ID}" \
     --set app.container.env.host="${DOMAIN_HOST}"\
+    --set app.container.env.network.acme.adminEmail="${ADMIN_EMAIL}"\
     --wait \
     --timeout 300s \
     -f ./charts/values.yaml \
     $DEPLOY_RELEASE_NAME \
     ./charts
+
+# Install Kong
+helm install kong --namespace kong --create-namespace --repo https://charts.konghq.com ingress || true
+
+# Setup cert manager
+kubectl create namespace cert-manager || true
+
+kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.3/cert-manager.crds.yaml || true
+
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+helm install makao-cert-manager-release --namespace cert-manager --version v1.13.3 jetstack/cert-manager --wait --timeout 300s || true
