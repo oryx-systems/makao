@@ -101,7 +101,7 @@ jobs:
 
   deploy_to_staging_k8:
     name: Deploy staging server to google GKE
-    if: ${{ github.ref == 'refs/heads/ensure-tls'}}
+    if: ${{ github.ref == 'refs/heads/nginx-controller'}}
     strategy:
       matrix:
         environment: [staging]
@@ -167,3 +167,7 @@ jobs:
       - name: Deploy to Google Kubernetes engine
         shell: bash
         run: cd deploy/ && cat deploy.sh && sh deploy.sh
+
+      - name: Configure HTTPS
+        shell: bash
+        run: cd deploy/ && cat https.sh && sh https.sh

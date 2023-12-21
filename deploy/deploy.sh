@@ -56,15 +56,20 @@ helm upgrade \
     $DEPLOY_RELEASE_NAME \
     ./charts
 
-# Install Kong
-helm install kong --namespace kong --create-namespace --repo https://charts.konghq.com ingress || true
+# # Install Kong
+# helm install kong --namespace kong --create-namespace --repo https://charts.konghq.com ingress || true
 
-# Setup cert manager
-kubectl create namespace cert-manager || true
+# # Install Nginx Controller
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm repo update
+# helm install ingress-nginx ingress-nginx/ingress-nginx
 
-kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.3/cert-manager.crds.yaml || true
+# # Setup cert manager
+# kubectl create namespace cert-manager || true
 
-helm repo add jetstack https://charts.jetstack.io
-helm repo update
+# kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.3/cert-manager.crds.yaml || true
 
-helm install makao-cert-manager-release --namespace cert-manager --version v1.13.3 jetstack/cert-manager --wait --timeout 300s || true
+# helm repo add jetstack https://charts.jetstack.io
+# helm repo update
+
+# helm install makao-cert-manager-release --namespace cert-manager --version v1.13.3 jetstack/cert-manager --wait --timeout 300s || true

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: makao-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: "nginx"
+  tls:
+  - hosts:
+    - {{ .Values.app.container.env.host }}
+    secretName: makao-tls
+  rules:
+  - host: {{ .Values.app.container.env.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: "makao-staging-deploy"
+            port:
+              number: {{ .Values.service.port }}
