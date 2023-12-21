@@ -101,7 +101,7 @@ jobs:
 
   deploy_to_staging_k8:
     name: Deploy staging server to google GKE
-    if: ${{ github.ref == 'refs/heads/ensure-tls'}}
+    if: ${{ github.ref == 'refs/heads/feature'}}
     strategy:
       matrix:
         environment: [staging]
