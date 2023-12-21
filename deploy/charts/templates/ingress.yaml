@@ -4,6 +4,9 @@ metadata:
   name: makao-ingress
   annotations:
     kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    konghq.com/protocols: "https"
+    konghq.com/https-redirect-status-code: "308"
 spec:
   ingressClassName: "kong"
   tls:
